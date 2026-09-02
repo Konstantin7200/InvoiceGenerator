@@ -1,5 +1,5 @@
-export class emailSenderApi {
-  async sendEmail(email: string, pdfDoc: File) {
+export class EmailSenderApi {
+  async sendEmail(email: string, pdfDoc: any) {
     await fetch('');
   }
 }

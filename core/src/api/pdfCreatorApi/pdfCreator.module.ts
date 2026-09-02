@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { pdfCreatorApi } from './pdfCreatorApi';
+import { PdfCreatorApi } from './pdfCreatorApi';
 
 @Module({
-  providers: [pdfCreatorApi],
+  providers: [PdfCreatorApi],
 })
 export class InvoiceModule {}

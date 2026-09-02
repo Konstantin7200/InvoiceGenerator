@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { emailSenderApi } from './emailSenderApi';
+import { EmailSenderApi } from './emailSenderApi';
 
 @Module({
-  providers: [emailSenderApi],
+  providers: [EmailSenderApi],
 })
 export class InvoiceModule {}
