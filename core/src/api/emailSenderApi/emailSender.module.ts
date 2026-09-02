@@ -3,5 +3,6 @@ import { EmailSenderApi } from './emailSenderApi';
 
 @Module({
   providers: [EmailSenderApi],
+  exports: [EmailSenderApi],
 })
-export class InvoiceModule {}
+export class EmailSenderModule {}

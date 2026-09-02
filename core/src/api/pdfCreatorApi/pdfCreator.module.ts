@@ -3,5 +3,6 @@ import { PdfCreatorApi } from './pdfCreatorApi';
 
 @Module({
   providers: [PdfCreatorApi],
+  exports: [PdfCreatorApi],
 })
-export class InvoiceModule {}
+export class PdfCreatorModule {}

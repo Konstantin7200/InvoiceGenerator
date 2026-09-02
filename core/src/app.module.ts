@@ -1,27 +1,22 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
+import * as Joi from 'joi';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { InvoiceModule } from './invoice/invoice.module';
-import { ConfigModule } from './config/config.module';
-import { ConfigService } from './config/config.service';
 import { ClientModule } from './client/client.module';
 
 @Module({
   imports: [
-    ConfigModule,
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.dbHost,
-        port: configService.dbPort,
-        username: configService.dbUsername,
-        password: configService.dbPassword,
-        database: configService.dbName,
-        autoLoadEntities: true,
-        synchronize: true,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validationSchema: Joi.object({
+        PORT: Joi.number().required(),
+        DB_HOST: Joi.string().required(),
+        DB_PORT: Joi.number().required(),
+        DB_USERNAME: Joi.string().required(),
+        DB_PASSWORD: Joi.string().required(),
+        DB_NAME: Joi.string().required(),
       }),
     }),
     InvoiceModule,
