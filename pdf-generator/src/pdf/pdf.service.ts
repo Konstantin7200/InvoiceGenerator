@@ -14,7 +14,7 @@ export class PdfService {
     companyName,
     jobs,
   }: PdfDto) {
-    const htmlTemplate = await this.htmlGenerator.generateHtml(
+    const htmlTemplate = this.htmlGenerator.generateHtml(
       email,
       firstName,
       lastName,
