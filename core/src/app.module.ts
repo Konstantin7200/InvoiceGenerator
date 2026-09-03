@@ -17,6 +17,8 @@ import { ClientModule } from './client/client.module';
         DB_USERNAME: Joi.string().required(),
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
+        PDF_API: Joi.string().required(),
+        EMAIL_API: Joi.string().required(),
       }),
     }),
     InvoiceModule,
