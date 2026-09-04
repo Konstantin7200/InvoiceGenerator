@@ -5,7 +5,7 @@ export class PdfDto {
     lastName: string,
     companyEmail: string,
     companyName: string,
-    jobs: Map<string, number>,
+    jobs: Record<string, number>,
   ) {
     this.email = email;
     this.firstName = firstName;
@@ -19,5 +19,5 @@ export class PdfDto {
   lastName: string;
   companyEmail: string;
   companyName: string;
-  jobs: Map<string, number>;
+  jobs: Record<string, number>;
 }

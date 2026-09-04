@@ -5,11 +5,15 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { InvoiceModule } from './invoice/invoice.module';
 import { ClientModule } from './client/client.module';
+import serverConfig from './config/server.config';
+import databaseConfig from './config/database.config';
+import apiConfig from './config/api.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      load: [serverConfig, databaseConfig, apiConfig],
       validationSchema: Joi.object({
         PORT: Joi.number().required(),
         DB_HOST: Joi.string().required(),

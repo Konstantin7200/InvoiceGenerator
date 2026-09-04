@@ -1,0 +1,108 @@
+openapi: 3.0.3
+info:
+  title: Invoice Generator - PDF Generator Service
+  description: Microservice responsible for generating styled invoice PDFs using Handlebars templates.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3002
+    description: Local development server
+
+paths:
+  /:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      tags:
+        - App
+      responses:
+        '200':
+          description: Service is running
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Hello World!
+
+  /pdf:
+    post:
+      summary: Generate an invoice PDF
+      description: >
+        Accepts invoice data and returns a generated PDF file containing a styled
+        invoice with client details, job breakdown, and total.
+      operationId: generatePdf
+      tags:
+        - PDF
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PdfDto'
+      responses:
+        '200':
+          description: PDF generated successfully
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    PdfDto:
+      type: object
+      required:
+        - email
+        - firstName
+        - lastName
+        - companyEmail
+        - companyName
+        - jobs
+      properties:
+        email:
+          type: string
+          description: Client email address
+          example: john@example.com
+        firstName:
+          type: string
+          description: Client first name
+          example: John
+        lastName:
+          type: string
+          description: Client last name
+          example: Doe
+        companyEmail:
+          type: string
+          description: Client company email
+          example: john@company.com
+        companyName:
+          type: string
+          description: Client company name
+          example: Acme Corp
+        jobs:
+          type: object
+          description: Map of job names to their amounts in dollars
+          additionalProperties:
+            type: number
+          example:
+            Web Development: 1500.00
+            UI Design: 800.50
+
+    Error:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          description: HTTP status code
+          example: 500
+        message:
+          type: string
+          description: Error message
+          example: Failed to generate PDF

@@ -1,0 +1,144 @@
+openapi: 3.0.3
+info:
+  title: Invoice Generator - Core Service
+  description: Orchestrator microservice for client management and invoice creation.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:{port}
+    description: Local development server
+    variables:
+      port:
+        default: 3000
+
+paths:
+  /:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      tags:
+        - App
+      responses:
+        '200':
+          description: Service is running
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Hello World!
+
+  /client:
+    post:
+      summary: Create a client
+      operationId: createClient
+      tags:
+        - Client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Client'
+      responses:
+        '201':
+          description: Client created successfully
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /invoice:
+    post:
+      summary: Create an invoice
+      description: >
+        Orchestrates invoice creation by looking up the client, generating a PDF,
+        and sending it via email. Returns 404 if the client is not found.
+      operationId: createInvoice
+      tags:
+        - Invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInvoiceDto'
+      responses:
+        '200':
+          description: Invoice created and sent successfully
+        '404':
+          description: Client not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Client:
+      type: object
+      required:
+        - email
+        - firstName
+        - lastName
+        - companyEmail
+        - companyName
+      properties:
+        email:
+          type: string
+          description: Client email address
+          example: john@example.com
+        firstName:
+          type: string
+          description: Client first name
+          example: John
+        lastName:
+          type: string
+          description: Client last name
+          example: Doe
+        companyEmail:
+          type: string
+          description: Client company email
+          example: john@company.com
+        companyName:
+          type: string
+          description: Client company name
+          example: Acme Corp
+
+    CreateInvoiceDto:
+      type: object
+      required:
+        - email
+        - jobs
+      properties:
+        email:
+          type: string
+          description: Client email address (used to look up the client)
+          example: john@example.com
+        jobs:
+          type: object
+          description: Map of job names to their amounts in dollars
+          additionalProperties:
+            type: number
+          example:
+            Web Development: 1500.00
+            UI Design: 800.50
+
+    Error:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          description: HTTP status code
+          example: 404
+        message:
+          type: string
+          description: Error message
+          example: Client not found

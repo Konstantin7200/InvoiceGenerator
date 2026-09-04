@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 
 @Injectable()
 export class EmailService {
-  async sendEmail(email: string, file: any) {
-    const resend = new Resend(process.env.RESEND_API_KEY);
+  constructor(private readonly configService: ConfigService) {}
 
-    const from = process.env.EMAIL_FROM!;
+  async sendEmail(email: string, file: Buffer) {
+    const resend = new Resend(this.configService.get('email.resendApiKey'));
+
+    const from = this.configService.get('email.from')!;
 
     const encoded = Buffer.from(file).toString('base64');
 
