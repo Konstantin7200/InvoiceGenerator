@@ -6,12 +6,9 @@ import { Resend } from 'resend';
 export class EmailService {
   constructor(private readonly configService: ConfigService) {}
 
-  async sendEmail(email: string, file: Buffer) {
+  async sendEmail(email: string, file: string) {
     const resend = new Resend(this.configService.get('email.resendApiKey'));
-
-    const from = this.configService.get('email.from')!;
-
-    const encoded = Buffer.from(file).toString('base64');
+    const from: string = this.configService.get('email.from')!;
 
     const { data, error } = await resend.emails.send({
       from,
@@ -21,16 +18,13 @@ export class EmailService {
       attachments: [
         {
           filename: 'invoice.pdf',
-          content: encoded,
+          content: file,
         },
       ],
     });
+    console.log(data);
+    console.log(error);
 
-    if (error) {
-      console.error('Error sending email:', error);
-    }
-
-    console.log('Email with attachment sent successfully!');
-    console.log('Email ID:', data?.id);
+    console.log("Done");
   }
 }

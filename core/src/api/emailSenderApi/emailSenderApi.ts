@@ -7,9 +7,10 @@ export class EmailSenderApi {
   async sendEmail(email: string, pdfDoc: Buffer) {
     await fetch(`${this.configService.get('api.emailUrl')}/email`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email,
-        file: pdfDoc,
+        file: pdfDoc.toString('base64'),
       }),
     });
   }

@@ -1,8 +1,10 @@
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+
 export class EmailDto {
-  constructor(email: string, file: Buffer) {
-    this.email = email;
-    this.file = file;
-  }
+  @IsEmail()
   email: string;
-  file: Buffer;
+
+  @IsString()
+  @IsNotEmpty()
+  file: string;
 }
