@@ -1,30 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Resend } from 'resend';
+import { MailerooService } from '../maileroo/maileroo.service';
 
 @Injectable()
 export class EmailService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly mailerooService: MailerooService,
+  ) {}
 
   async sendEmail(email: string, file: string) {
-    const resend = new Resend(this.configService.get('email.resendApiKey'));
-    const from: string = this.configService.get('email.from')!;
+    const from = this.configService.get<string>('email.from')!;
 
-    const { data, error } = await resend.emails.send({
-      from,
-      to: email,
+    const result = await this.mailerooService.sendEmail({
+      from: { address: from },
+      to: [{ address: email }],
       subject: 'Email with jobs invoice',
       html: '<h1>Your invoice is ready</h1><p>Please find the file attached to this email.</p>',
       attachments: [
         {
-          filename: 'invoice.pdf',
+          file_name: 'invoice.pdf',
           content: file,
+          content_type: 'application/pdf',
+          inline: false,
         },
       ],
     });
-    console.log(data);
-    console.log(error);
 
-    console.log("Done");
+    console.log('Email sent with reference ID:', result.data.reference_id);
   }
 }
