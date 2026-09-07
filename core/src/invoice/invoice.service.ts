@@ -11,9 +11,10 @@ export class InvoiceService {
     private readonly emailSender: EmailSenderApi,
   ) {}
   async createInvoice(email: string, jobs: Record<string, number>) {
-    const client = await this.clientRepository.getOne(email);
-    if (client === null) throw new NotFoundException('Client not found');
-    const file = await this.pdfCreator.createPdf(email, jobs);
+    const clientFromDb = await this.clientRepository.getOne(email);
+    if (clientFromDb === null) throw new NotFoundException('Client not found');
+    const { id, ...client } = clientFromDb;
+    const file = await this.pdfCreator.createPdf({ ...client, jobs });
     console.log(file);
     await this.emailSender.sendEmail(email, file);
   }
