@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, StreamableFile } from '@nestjs/common';
 import { PdfService } from './pdf.service';
 import { PdfDto } from './dto/pdfDto';
 
@@ -7,7 +7,8 @@ export class PdfController {
   constructor(private readonly pdfService: PdfService) {}
   @Post()
   async createPdf(@Body() pdfDto: PdfDto) {
+    console.log(pdfDto);
     const result = await this.pdfService.createPdf(pdfDto);
-    return result;
+    return new StreamableFile(result);
   }
 }

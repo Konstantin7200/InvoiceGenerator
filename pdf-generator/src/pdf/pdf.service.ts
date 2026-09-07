@@ -23,7 +23,10 @@ export class PdfService {
       jobs,
     );
 
-    const pdfFile = await generatePdf({ content: htmlTemplate });
+    const pdfFile = await generatePdf(
+      { content: htmlTemplate },
+      { format: 'A4', printBackground: true },
+    );
     return pdfFile;
   }
 }
