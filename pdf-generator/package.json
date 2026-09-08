@@ -28,6 +28,8 @@
     "@nestjs/platform-express": "^11.0.1",
     "@types/html-pdf-node": "^1.0.3",
     "bullmq": "^6.3.4",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
     "handlebars": "^4.7.9",
     "html-pdf-node": "^1.0.8",
     "ioredis": "^6.0.0",

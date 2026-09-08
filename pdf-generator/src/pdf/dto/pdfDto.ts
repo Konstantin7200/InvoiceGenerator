@@ -1,23 +1,24 @@
+import { IsEmail, IsNotEmpty, IsObject, IsString } from 'class-validator';
+
 export class PdfDto {
-  constructor(
-    email: string,
-    firstName: string,
-    lastName: string,
-    companyEmail: string,
-    companyName: string,
-    jobs: Record<string, number>,
-  ) {
-    this.email = email;
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.jobs = jobs;
-    this.companyName = companyName;
-    this.companyEmail = companyEmail;
-  }
+  @IsEmail()
   email: string;
+
+  @IsString()
+  @IsNotEmpty()
   firstName: string;
+
+  @IsString()
+  @IsNotEmpty()
   lastName: string;
+
+  @IsEmail()
   companyEmail: string;
+
+  @IsString()
+  @IsNotEmpty()
   companyName: string;
+
+  @IsObject()
   jobs: Record<string, number>;
 }

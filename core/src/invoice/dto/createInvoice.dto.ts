@@ -1,8 +1,9 @@
+import { IsEmail, IsObject } from 'class-validator';
+
 export class CreateInvoiceDto {
-  constructor(email: string, jobs: Record<string, number>) {
-    this.email = email;
-    this.jobs = jobs;
-  }
+  @IsEmail()
   email: string;
+
+  @IsObject()
   jobs: Record<string, number>;
 }

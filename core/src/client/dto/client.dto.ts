@@ -1,20 +1,21 @@
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+
 export class Client {
-  constructor(
-    firstName: string,
-    lastName: string,
-    companyEmail: string,
-    companyName: string,
-    email: string,
-  ) {
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.companyEmail = companyEmail;
-    this.companyName = companyName;
-    this.email = email;
-  }
+  @IsString()
+  @IsNotEmpty()
   firstName: string;
+
+  @IsString()
+  @IsNotEmpty()
   lastName: string;
+
+  @IsEmail()
   companyEmail: string;
+
+  @IsString()
+  @IsNotEmpty()
   companyName: string;
+
+  @IsEmail()
   email: string;
 }
