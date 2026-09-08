@@ -4,7 +4,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 export class ClientEntity {
   @PrimaryGeneratedColumn()
   id!: number;
-  @Column()
+  @Column({ unique: true })
   email!: string;
   @Column()
   firstName!: string;

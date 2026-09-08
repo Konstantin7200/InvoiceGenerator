@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { ClientEntity } from './entities/clientEntity';
 import { ClientRepository } from './clientRepository';
+import { ClientSeedService } from './clientSeed.service';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { ClientRepository } from './clientRepository';
     }),
     TypeOrmModule.forFeature([ClientEntity]),
   ],
-  providers: [ClientRepository],
+  providers: [ClientRepository, ClientSeedService],
   exports: [ClientRepository],
 })
 export class DatabaseModule {}

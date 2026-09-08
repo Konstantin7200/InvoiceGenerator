@@ -18,4 +18,12 @@ export class ClientRepository {
     const result = await this.repo.findOneBy({ email: email });
     return result;
   }
+  async addIfNotExists(clients: PartialClient[]) {
+    await this.repo.createQueryBuilder()
+      .insert()
+      .into(ClientEntity)
+      .values(clients)
+      .orIgnore()
+      .execute();
+  }
 }

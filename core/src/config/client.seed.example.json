@@ -1,0 +1,9 @@
+[
+  {
+    "firstName": "John",
+    "lastName": "Doe",
+    "companyEmail": "john.doe@acme.com",
+    "companyName": "Acme Corp",
+    "email": "john@acme.com"
+  }
+]
