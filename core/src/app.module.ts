@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { BullModule } from '@nestjs/bullmq';
 import * as Joi from 'joi';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -8,12 +9,13 @@ import { ClientModule } from './client/client.module';
 import serverConfig from './config/server.config';
 import databaseConfig from './config/database.config';
 import apiConfig from './config/api.config';
+import redisConfig from './config/redis.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [serverConfig, databaseConfig, apiConfig],
+      load: [serverConfig, databaseConfig, apiConfig, redisConfig],
       validationSchema: Joi.object({
         PORT: Joi.number().required(),
         DB_HOST: Joi.string().required(),
@@ -23,7 +25,19 @@ import apiConfig from './config/api.config';
         DB_NAME: Joi.string().required(),
         PDF_API: Joi.string().required(),
         EMAIL_API: Joi.string().required(),
+        REDIS_HOST: Joi.string().required(),
+        REDIS_PORT: Joi.number().required(),
       }),
+    }),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          host: configService.get('redis.host'),
+          port: configService.get('redis.port'),
+        },
+      }),
+      inject: [ConfigService],
     }),
     InvoiceModule,
     ClientModule,

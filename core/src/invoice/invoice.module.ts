@@ -1,12 +1,29 @@
 import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bullmq';
 import { InvoiceService } from './invoice.service';
 import { InvoiceController } from './invoice.controller';
 import { DatabaseModule } from '../db/db.module';
-import { PdfCreatorModule } from '../api/pdfCreatorApi/pdfCreator.module';
-import { EmailSenderModule } from '../api/emailSenderApi/emailSender.module';
 
 @Module({
-  imports: [DatabaseModule, PdfCreatorModule, EmailSenderModule],
+  imports: [
+    DatabaseModule,
+    BullModule.registerQueue(
+      {
+        name: 'pdf',
+        defaultJobOptions: {
+          attempts: 3,
+          backoff: { type: 'exponential', delay: 2000 },
+        },
+      },
+      {
+        name: 'email',
+        defaultJobOptions: {
+          attempts: 5,
+          backoff: { type: 'exponential', delay: 1000 },
+        },
+      },
+    ),
+  ],
   controllers: [InvoiceController],
   providers: [InvoiceService],
 })
