@@ -3,23 +3,32 @@ import { BullModule } from '@nestjs/bullmq';
 import { InvoiceService } from './invoice.service';
 import { InvoiceController } from './invoice.controller';
 import { DatabaseModule } from '../db/db.module';
+import {
+  PDF_QUEUE_NAME,
+  EMAIL_QUEUE_NAME,
+  PDF_QUEUE_MAX_ATTEMPTS,
+  PDF_QUEUE_BACKOFF_DELAY_MS,
+  EMAIL_QUEUE_MAX_ATTEMPTS,
+  EMAIL_QUEUE_BACKOFF_DELAY_MS,
+  BACKOFF_TYPE,
+} from './constants';
 
 @Module({
   imports: [
     DatabaseModule,
     BullModule.registerQueue(
       {
-        name: 'pdf',
+        name: PDF_QUEUE_NAME,
         defaultJobOptions: {
-          attempts: 3,
-          backoff: { type: 'exponential', delay: 2000 },
+          attempts: PDF_QUEUE_MAX_ATTEMPTS,
+          backoff: { type: BACKOFF_TYPE, delay: PDF_QUEUE_BACKOFF_DELAY_MS },
         },
       },
       {
-        name: 'email',
+        name: EMAIL_QUEUE_NAME,
         defaultJobOptions: {
-          attempts: 5,
-          backoff: { type: 'exponential', delay: 1000 },
+          attempts: EMAIL_QUEUE_MAX_ATTEMPTS,
+          backoff: { type: BACKOFF_TYPE, delay: EMAIL_QUEUE_BACKOFF_DELAY_MS },
         },
       },
     ),

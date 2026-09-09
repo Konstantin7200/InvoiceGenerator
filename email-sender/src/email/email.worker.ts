@@ -3,8 +3,9 @@ import { EmailService } from './email.service';
 import { Job } from 'bullmq';
 import { EmailDto } from './dto/email.dto';
 import { BullMqValidationPipe } from './pipes/bullmq-validation.pipe';
+import { EMAIL_QUEUE_NAME } from './constants';
 
-@Processor('email')
+@Processor(EMAIL_QUEUE_NAME)
 export class EmailWorker extends WorkerHost {
   private readonly validationPipe = new BullMqValidationPipe();
 

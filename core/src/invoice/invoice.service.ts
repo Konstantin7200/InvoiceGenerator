@@ -3,6 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue, QueueEvents } from 'bullmq';
 import { ClientRepository } from 'src/db/clientRepository';
+import {
+  PDF_QUEUE_NAME,
+  EMAIL_QUEUE_NAME,
+  JOB_TYPE_GENERATE_PDF,
+  JOB_TYPE_SEND_EMAIL,
+  PDF_JOB_COMPLETION_TIMEOUT_MS,
+  EMAIL_JOB_COMPLETION_TIMEOUT_MS,
+} from './constants';
 
 @Injectable()
 export class InvoiceService {
@@ -12,15 +20,15 @@ export class InvoiceService {
   constructor(
     private readonly clientRepository: ClientRepository,
     private readonly configService: ConfigService,
-    @InjectQueue('pdf') private readonly pdfQueue: Queue,
-    @InjectQueue('email') private readonly emailQueue: Queue,
+    @InjectQueue(PDF_QUEUE_NAME) private readonly pdfQueue: Queue,
+    @InjectQueue(EMAIL_QUEUE_NAME) private readonly emailQueue: Queue,
   ) {
     const connection = {
-      host: this.configService.get('redis.host'),
-      port: this.configService.get('redis.port'),
+      host: this.configService.get('redis.host') as string,
+      port: parseInt(this.configService.get('redis.port')!, 10),
     };
-    this.pdfQueueEvents = new QueueEvents('pdf', { connection });
-    this.emailQueueEvents = new QueueEvents('email', { connection });
+    this.pdfQueueEvents = new QueueEvents(PDF_QUEUE_NAME, { connection });
+    this.emailQueueEvents = new QueueEvents(EMAIL_QUEUE_NAME, { connection });
   }
 
   async createInvoice(email: string, jobs: Record<string, number>) {
@@ -29,20 +37,22 @@ export class InvoiceService {
 
     const { id, ...client } = clientFromDb;
 
-    const pdfJob = await this.pdfQueue.add('generate-pdf', {
+    const pdfJob = await this.pdfQueue.add(JOB_TYPE_GENERATE_PDF, {
       ...client,
       jobs,
     });
-    const pdfResult = await pdfJob.waitUntilFinished(
+
+    const pdfResult = (await pdfJob.waitUntilFinished(
       this.pdfQueueEvents,
-      30_000,
-    );
+      PDF_JOB_COMPLETION_TIMEOUT_MS,
+    )) as ArrayBuffer;
+
     const pdfBuffer = Buffer.from(pdfResult);
 
-    const emailJob = await this.emailQueue.add('send-email', {
+    const emailJob = await this.emailQueue.add(JOB_TYPE_SEND_EMAIL, {
       email,
       file: pdfBuffer.toString('base64'),
     });
-    await emailJob.waitUntilFinished(this.emailQueueEvents, 10_000);
+    await emailJob.waitUntilFinished(this.emailQueueEvents, EMAIL_JOB_COMPLETION_TIMEOUT_MS);
   }
 }

@@ -33,8 +33,8 @@ import redisConfig from './config/redis.config';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         connection: {
-          host: configService.get('redis.host'),
-          port: configService.get('redis.port'),
+          host: configService.get('redis.host') as string,
+          port: parseInt(configService.get('redis.port')!, 10),
         },
       }),
       inject: [ConfigService],

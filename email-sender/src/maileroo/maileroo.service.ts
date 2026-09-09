@@ -1,9 +1,10 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { MAILEROO_API_URL } from './constants';
 
 @Injectable()
 export class MailerooService {
-  private readonly apiUrl = 'https://smtp.maileroo.com/api/v2/emails';
+  private readonly apiUrl = MAILEROO_API_URL;
 
   constructor(private readonly configService: ConfigService) {}
 

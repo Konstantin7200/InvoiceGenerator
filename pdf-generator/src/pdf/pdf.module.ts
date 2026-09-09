@@ -3,9 +3,10 @@ import { BullModule } from '@nestjs/bullmq';
 import { PdfService } from './pdf.service';
 import { PdfWorker } from './pdf.worker';
 import { HtmlGeneratorModule } from 'src/htmlGenerator/htmlGenerator.module';
+import { PDF_QUEUE_NAME } from './constants';
 
 @Module({
-  imports: [HtmlGeneratorModule, BullModule.registerQueue({ name: 'pdf' })],
+  imports: [HtmlGeneratorModule, BullModule.registerQueue({ name: PDF_QUEUE_NAME })],
   providers: [PdfService, PdfWorker],
 })
 export class PdfModule {}
