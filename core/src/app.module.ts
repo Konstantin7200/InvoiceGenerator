@@ -27,6 +27,8 @@ import redisConfig from './config/redis.config';
         EMAIL_API: Joi.string().required(),
         REDIS_HOST: Joi.string().required(),
         REDIS_PORT: Joi.number().required(),
+        REDIS_PASSWORD: Joi.string().optional(),
+        REDIS_TLS: Joi.string().optional(),
       }),
     }),
     BullModule.forRootAsync({
@@ -35,6 +37,8 @@ import redisConfig from './config/redis.config';
         connection: {
           host: configService.get('redis.host') as string,
           port: parseInt(configService.get('redis.port')!, 10),
+          password: configService.get('redis.password') as string,
+          tls: configService.get('redis.tls') === 'true' ? {} : undefined,
         },
       }),
       inject: [ConfigService],

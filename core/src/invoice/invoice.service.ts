@@ -23,10 +23,7 @@ export class InvoiceService {
     @InjectQueue(PDF_QUEUE_NAME) private readonly pdfQueue: Queue,
     @InjectQueue(EMAIL_QUEUE_NAME) private readonly emailQueue: Queue,
   ) {
-    const connection = {
-      host: this.configService.get('redis.host') as string,
-      port: parseInt(this.configService.get('redis.port')!, 10),
-    };
+    const connection = this.pdfQueue.opts.connection;
     this.pdfQueueEvents = new QueueEvents(PDF_QUEUE_NAME, { connection });
     this.emailQueueEvents = new QueueEvents(EMAIL_QUEUE_NAME, { connection });
   }

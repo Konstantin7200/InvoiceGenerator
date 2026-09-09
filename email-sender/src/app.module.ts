@@ -20,6 +20,8 @@ import { BullModule } from '@nestjs/bullmq';
         EMAIL_FROM: Joi.string().email().required(),
         REDIS_HOST: Joi.string().required(),
         REDIS_PORT: Joi.number().required(),
+        REDIS_PASSWORD: Joi.string().optional(),
+        REDIS_TLS: Joi.string().optional(),
       }),
     }),
     BullModule.forRootAsync({
@@ -28,6 +30,8 @@ import { BullModule } from '@nestjs/bullmq';
         connection: {
           host: configService.get('redis.host'),
           port: configService.get('redis.port'),
+          password: configService.get('redis.password'),
+          tls: configService.get('redis.tls') === 'true' ? {} : undefined,
         },
       }),
       inject: [ConfigService],

@@ -27,6 +27,6 @@ export class EmailService {
       ],
     });
 
-    console.log('Email sent with reference ID:', result.data.reference_id);
+
   }
 }

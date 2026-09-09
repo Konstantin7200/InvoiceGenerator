@@ -16,6 +16,6 @@ export class EmailSenderApi {
         }),
       },
     );
-    console.log(response);
+
   }
 }

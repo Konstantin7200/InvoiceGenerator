@@ -17,6 +17,8 @@ import redisConfig from './config/redis.config';
         PORT: Joi.number().required(),
         REDIS_HOST: Joi.string().required(),
         REDIS_PORT: Joi.number().required(),
+        REDIS_PASSWORD: Joi.string().optional(),
+        REDIS_TLS: Joi.string().optional(),
       }),
     }),
     BullModule.forRootAsync({
@@ -25,6 +27,8 @@ import redisConfig from './config/redis.config';
         connection: {
           host: configService.get('redis.host'),
           port: configService.get('redis.port'),
+          password: configService.get('redis.password'),
+          tls: configService.get('redis.tls') === 'true' ? {} : undefined,
         },
       }),
       inject: [ConfigService],
