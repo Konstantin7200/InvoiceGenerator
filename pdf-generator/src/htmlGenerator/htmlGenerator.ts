@@ -6,7 +6,7 @@ export class HtmlGenerator {
   private template: HandlebarsTemplateDelegate;
 
   constructor() {
-    const templatePath = path.join(process.cwd(), 'templates', 'invoice.hbs');
+    const templatePath = path.join(__dirname, '..', 'templates', 'invoice.hbs');
     const templateSource = fs.readFileSync(templatePath, 'utf-8');
     this.template = Handlebars.compile(templateSource);
   }
