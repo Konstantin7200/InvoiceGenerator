@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { generatePdf } from 'html-pdf-node';
-import { HtmlGenerator } from 'src/htmlGenerator/htmlGenerator';
+import { HtmlGenerator } from '../htmlGenerator/htmlGenerator';
 import { PdfDto } from './dto/pdfDto';
 
 @Injectable()
