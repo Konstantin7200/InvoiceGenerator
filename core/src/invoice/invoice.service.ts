@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException, Logger, NotFoundException } f
 import { ConfigService } from '@nestjs/config';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue, QueueEvents } from 'bullmq';
-import { ClientRepository } from 'src/db/clientRepository';
+import { ClientRepository } from '../db/clientRepository';
 import {
   PDF_QUEUE_NAME,
   EMAIL_QUEUE_NAME,
