@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue, QueueEvents } from 'bullmq';
@@ -52,7 +57,10 @@ export class InvoiceService {
         email,
         file: pdfBuffer.toString('base64'),
       });
-      await emailJob.waitUntilFinished(this.emailQueueEvents, EMAIL_JOB_COMPLETION_TIMEOUT_MS);
+      await emailJob.waitUntilFinished(
+        this.emailQueueEvents,
+        EMAIL_JOB_COMPLETION_TIMEOUT_MS,
+      );
     } catch (error) {
       this.logger.error('Failed to process invoice', error.stack);
       throw new InternalServerErrorException('Failed to process invoice');

@@ -22,6 +22,10 @@ import {
         username: configService.get('database.username'),
         password: configService.get('database.password'),
         database: configService.get('database.name'),
+        ssl:
+          configService.get('database.ssl') === 'true'
+            ? { rejectUnauthorized: false }
+            : undefined,
         entities: [ClientEntity],
         synchronize: true,
         retryAttempts: DB_RETRY_ATTEMPTS,
