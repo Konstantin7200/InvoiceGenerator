@@ -9,7 +9,7 @@ import {
   DB_RETRY_ATTEMPTS,
   DB_RETRY_DELAY_MS,
   DB_CONNECT_TIMEOUT_MS,
-} from './constants';
+} from '../config/constants';
 
 @Module({
   imports: [

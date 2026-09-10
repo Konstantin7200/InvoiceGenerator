@@ -10,7 +10,7 @@ import {
   JOB_TYPE_SEND_EMAIL,
   PDF_JOB_COMPLETION_TIMEOUT_MS,
   EMAIL_JOB_COMPLETION_TIMEOUT_MS,
-} from './constants';
+} from '../config/constants';
 
 @Injectable()
 export class InvoiceService {

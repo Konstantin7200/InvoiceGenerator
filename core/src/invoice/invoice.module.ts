@@ -11,7 +11,7 @@ import {
   EMAIL_QUEUE_MAX_ATTEMPTS,
   EMAIL_QUEUE_BACKOFF_DELAY_MS,
   BACKOFF_TYPE,
-} from './constants';
+} from '../config/constants';
 
 @Module({
   imports: [
