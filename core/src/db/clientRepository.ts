@@ -18,6 +18,10 @@ export class ClientRepository {
     const result = await this.repo.findOneBy({ email: email });
     return result;
   }
+  async existsByEmail(email: string): Promise<boolean> {
+    const result = await this.repo.findOneBy({ email });
+    return result !== null;
+  }
   async addIfNotExists(clients: ClientType[]) {
     await this.repo
       .createQueryBuilder()

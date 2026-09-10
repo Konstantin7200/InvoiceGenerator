@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue, QueueEvents } from 'bullmq';
@@ -14,6 +14,7 @@ import {
 
 @Injectable()
 export class InvoiceService {
+  private readonly logger = new Logger(InvoiceService.name);
   private readonly pdfQueueEvents: QueueEvents;
   private readonly emailQueueEvents: QueueEvents;
 
@@ -34,22 +35,27 @@ export class InvoiceService {
 
     const { id, ...client } = clientFromDb;
 
-    const pdfJob = await this.pdfQueue.add(JOB_TYPE_GENERATE_PDF, {
-      ...client,
-      jobs,
-    });
+    try {
+      const pdfJob = await this.pdfQueue.add(JOB_TYPE_GENERATE_PDF, {
+        ...client,
+        jobs,
+      });
 
-    const pdfResult = (await pdfJob.waitUntilFinished(
-      this.pdfQueueEvents,
-      PDF_JOB_COMPLETION_TIMEOUT_MS,
-    )) as ArrayBuffer;
+      const pdfResult = (await pdfJob.waitUntilFinished(
+        this.pdfQueueEvents,
+        PDF_JOB_COMPLETION_TIMEOUT_MS,
+      )) as ArrayBuffer;
 
-    const pdfBuffer = Buffer.from(pdfResult);
+      const pdfBuffer = Buffer.from(pdfResult);
 
-    const emailJob = await this.emailQueue.add(JOB_TYPE_SEND_EMAIL, {
-      email,
-      file: pdfBuffer.toString('base64'),
-    });
-    await emailJob.waitUntilFinished(this.emailQueueEvents, EMAIL_JOB_COMPLETION_TIMEOUT_MS);
+      const emailJob = await this.emailQueue.add(JOB_TYPE_SEND_EMAIL, {
+        email,
+        file: pdfBuffer.toString('base64'),
+      });
+      await emailJob.waitUntilFinished(this.emailQueueEvents, EMAIL_JOB_COMPLETION_TIMEOUT_MS);
+    } catch (error) {
+      this.logger.error('Failed to process invoice', error.stack);
+      throw new InternalServerErrorException('Failed to process invoice');
+    }
   }
 }
