@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+export const INVOICE_TEMPLATE = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -39,7 +39,7 @@
           {{#each jobs}}
           <tr{{#if @first}} style="background-color: #f9fafb;"{{/if}}>
             <td style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">{{this.name}}</td>
-            <td style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; text-align: right;">${{this.amount}}</td>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; text-align: right;">\${{this.amount}}</td>
           </tr>
           {{/each}}
         </tbody>
@@ -50,7 +50,7 @@
         <div style="display: flex; justify-content: flex-end;">
           <div style="text-align: right;">
             <p style="margin: 0; color: #6b7280; font-size: 14px;">Total Amount</p>
-            <p style="margin: 4px 0 0 0; color: #111827; font-size: 24px; font-weight: 700;">${{total}}</p>
+            <p style="margin: 4px 0 0 0; color: #111827; font-size: 24px; font-weight: 700;">\${{total}}</p>
           </div>
         </div>
       </div>
@@ -64,4 +64,4 @@
     </div>
   </div>
 </body>
-</html>
+</html>`;

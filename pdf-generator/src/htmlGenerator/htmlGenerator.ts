@@ -1,14 +1,11 @@
 import * as Handlebars from 'handlebars';
-import * as fs from 'fs';
-import * as path from 'path';
+import { INVOICE_TEMPLATE } from './templates';
 
 export class HtmlGenerator {
   private template: HandlebarsTemplateDelegate;
 
   constructor() {
-    const templatePath = path.join(__dirname, '..', 'templates', 'invoice.hbs');
-    const templateSource = fs.readFileSync(templatePath, 'utf-8');
-    this.template = Handlebars.compile(templateSource);
+    this.template = Handlebars.compile(INVOICE_TEMPLATE);
   }
 
   generateHtml(
