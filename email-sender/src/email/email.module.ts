@@ -3,7 +3,7 @@ import { EmailService } from './email.service';
 import { MailerooModule } from '../maileroo/maileroo.module';
 import { BullModule } from '@nestjs/bullmq';
 import { EmailWorker } from './email.worker';
-import { EMAIL_QUEUE_NAME } from './constants';
+import { EMAIL_QUEUE_NAME } from '../config/constants';
 
 @Module({
   imports: [MailerooModule, BullModule.registerQueue({ name: EMAIL_QUEUE_NAME })],

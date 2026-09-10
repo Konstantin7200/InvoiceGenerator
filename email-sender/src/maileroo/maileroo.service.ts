@@ -1,6 +1,6 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { MAILEROO_API_URL } from './constants';
+import { MAILEROO_API_URL } from '../config/constants';
 
 @Injectable()
 export class MailerooService {

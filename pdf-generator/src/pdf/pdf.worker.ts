@@ -3,7 +3,7 @@ import { Job } from 'bullmq';
 import { PdfService } from './pdf.service';
 import { PdfDto } from './dto/pdfDto';
 import { BullMqValidationPipe } from './pipes/bullmq-validation.pipe';
-import { PDF_QUEUE_NAME } from './constants';
+import { PDF_QUEUE_NAME } from '../config/constants';
 
 @Processor(PDF_QUEUE_NAME)
 export class PdfWorker extends WorkerHost {

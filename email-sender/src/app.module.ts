@@ -15,7 +15,7 @@ import { BullModule } from '@nestjs/bullmq';
       isGlobal: true,
       load: [serverConfig, emailConfig, redisConfig],
       validationSchema: Joi.object({
-        PORT: Joi.number().optional(),
+        PORT: Joi.number().required(),
         MAILEROO_API_KEY: Joi.string().required(),
         EMAIL_FROM: Joi.string().email().required(),
         REDIS_HOST: Joi.string().required(),
