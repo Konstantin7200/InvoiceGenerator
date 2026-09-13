@@ -1,5 +1,6 @@
 import * as Handlebars from 'handlebars';
 import { INVOICE_TEMPLATE } from './templates';
+import { PdfDto } from 'src/pdf/dto/pdfDto';
 
 export class HtmlGenerator {
   private template: HandlebarsTemplateDelegate;
@@ -8,15 +9,8 @@ export class HtmlGenerator {
     this.template = Handlebars.compile(INVOICE_TEMPLATE);
   }
 
-  generateHtml(
-    email: string,
-    firstName: string,
-    lastName: string,
-    companyEmail: string,
-    companyName: string,
-    jobs: Record<string, number>,
-  ): string {
-    const jobsArray = Object.entries(jobs).map(([name, amount]) => ({
+  generateHtml(pdfDto: PdfDto): string {
+    const jobsArray = Object.entries(pdfDto.jobs).map(([name, amount]) => ({
       name,
       amount: amount.toFixed(2),
     }));
@@ -31,13 +25,8 @@ export class HtmlGenerator {
       month: 'long',
       day: 'numeric',
     });
-
     const context = {
-      email,
-      firstName,
-      lastName,
-      companyEmail,
-      companyName,
+      ...pdfDto,
       jobs: jobsArray,
       total: total.toFixed(2),
       invoiceDate,

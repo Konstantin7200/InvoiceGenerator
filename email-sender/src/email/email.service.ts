@@ -28,6 +28,11 @@ export class EmailService {
           },
         ],
       });
+      if(!result.success)
+      {
+        this.logger.error(result);
+        throw new Error("Maileroo sent not success");
+      }
     } catch (error) {
       this.logger.error('Failed to send email', error.stack);
       throw new InternalServerErrorException('Failed to send email');

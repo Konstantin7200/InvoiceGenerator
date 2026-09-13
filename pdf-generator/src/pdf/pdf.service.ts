@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { generatePdf } from 'html-pdf-node';
 import { HtmlGenerator } from '../htmlGenerator/htmlGenerator';
 import { PdfDto } from './dto/pdfDto';
@@ -7,23 +11,9 @@ import { PdfDto } from './dto/pdfDto';
 export class PdfService {
   private readonly logger = new Logger(PdfService.name);
   constructor(private readonly htmlGenerator: HtmlGenerator) {}
-  async createPdf({
-    email,
-    firstName,
-    lastName,
-    companyEmail,
-    companyName,
-    jobs,
-  }: PdfDto) {
+  async createPdf(pdfDto: PdfDto) {
     try {
-      const htmlTemplate = this.htmlGenerator.generateHtml(
-        email,
-        firstName,
-        lastName,
-        companyEmail,
-        companyName,
-        jobs,
-      );
+      const htmlTemplate = this.htmlGenerator.generateHtml(pdfDto);
 
       const pdfFile = await generatePdf(
         { content: htmlTemplate },

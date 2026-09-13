@@ -11,9 +11,6 @@ export class ClientRepository {
   async createOne(client: ClientType) {
     await this.repo.save(client);
   }
-  async createMany(clients: ClientType[]) {
-    await this.repo.save(clients);
-  }
   async getOne(email: string) {
     const result = await this.repo.findOneBy({ email: email });
     return result;

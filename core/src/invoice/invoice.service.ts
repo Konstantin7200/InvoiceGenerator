@@ -25,7 +25,6 @@ export class InvoiceService {
 
   constructor(
     private readonly clientRepository: ClientRepository,
-    private readonly configService: ConfigService,
     @InjectQueue(PDF_QUEUE_NAME) private readonly pdfQueue: Queue,
     @InjectQueue(EMAIL_QUEUE_NAME) private readonly emailQueue: Queue,
   ) {
