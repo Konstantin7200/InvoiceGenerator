@@ -12,10 +12,12 @@ import {
   EMAIL_QUEUE_BACKOFF_DELAY_MS,
   BACKOFF_TYPE,
 } from '../config/constants';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
     DatabaseModule,
+    AuthModule,
     BullModule.registerQueue(
       {
         name: PDF_QUEUE_NAME,

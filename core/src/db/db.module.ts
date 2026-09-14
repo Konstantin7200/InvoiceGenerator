@@ -12,6 +12,8 @@ import {
   DB_RETRY_DELAY_MS,
   DB_CONNECT_TIMEOUT_MS,
 } from '../config/constants';
+import { ApiKeyRepository } from './apiKeyRepository';
+import { ApiKeyEntity } from './entities/apiKeyEntity';
 
 @Module({
   imports: [
@@ -28,16 +30,21 @@ import {
           configService.get('database.ssl') === 'true'
             ? { rejectUnauthorized: false }
             : undefined,
-        entities: [ClientEntity, InvoiceEntity],
+        entities: [ClientEntity, InvoiceEntity, ApiKeyEntity],
         synchronize: true,
         retryAttempts: DB_RETRY_ATTEMPTS,
         retryDelay: DB_RETRY_DELAY_MS,
         connectTimeoutMS: DB_CONNECT_TIMEOUT_MS,
       }),
     }),
-    TypeOrmModule.forFeature([ClientEntity, InvoiceEntity]),
+    TypeOrmModule.forFeature([ClientEntity, InvoiceEntity, ApiKeyEntity]),
   ],
-  providers: [ClientRepository, InvoiceRepository, ClientSeedService],
-  exports: [ClientRepository, InvoiceRepository],
+  providers: [
+    ClientRepository,
+    InvoiceRepository,
+    ClientSeedService,
+    ApiKeyRepository,
+  ],
+  exports: [ClientRepository, InvoiceRepository, ApiKeyRepository],
 })
 export class DatabaseModule {}

@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { InvoiceModule } from './invoice/invoice.module';
 import { ClientModule } from './client/client.module';
+import { AuthModule } from './auth/auth.module';
 import serverConfig from './config/server.config';
 import databaseConfig from './config/database.config';
 import redisConfig from './config/redis.config';
@@ -43,6 +44,7 @@ import redisConfig from './config/redis.config';
     }),
     InvoiceModule,
     ClientModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
