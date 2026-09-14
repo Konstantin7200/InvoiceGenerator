@@ -1,9 +1,18 @@
-import { IsEmail, IsObject } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
+
+class JobItem {
+  @IsString()
+  @IsNotEmpty()
+  name!: string;
+
+  @IsNumber()
+  @Min(0, { each: true })
+  amount!: number;
+}
 
 export class CreateInvoiceDto {
   @IsEmail()
-  email: string;
+  email!: string;
 
-  @IsObject()
-  jobs: Record<string, number>;
+  jobs!: JobItem[];
 }

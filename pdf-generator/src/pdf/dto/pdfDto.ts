@@ -4,45 +4,47 @@ import {
   IsNotEmpty,
   IsNumber,
   IsString,
+  Min,
   ValidateNested,
 } from 'class-validator';
 
 class JobItem {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @IsNumber()
-  amount: number;
+  @Min(0, { each: true })
+  amount!: number;
 }
 
 export class PdfDto {
   @IsEmail()
-  email: string;
+  email!: string;
 
   @IsString()
   @IsNotEmpty()
-  firstName: string;
+  firstName!: string;
 
   @IsString()
   @IsNotEmpty()
-  lastName: string;
+  lastName!: string;
 
   @IsEmail()
-  companyEmail: string;
+  companyEmail!: string;
 
   @IsString()
   @IsNotEmpty()
-  companyName: string;
+  companyName!: string;
 
   @IsArray()
   @ValidateNested({ each: true })
-  jobs: JobItem[];
+  jobs!: JobItem[];
 
   @IsNumber()
-  total: number;
+  total!: number;
 
   @IsString()
   @IsNotEmpty()
-  invoiceDate: string;
+  invoiceDate!: string;
 }
