@@ -12,28 +12,6 @@ export class HtmlGenerator {
   }
 
   generateHtml(pdfDto: PdfDto): string {
-    const jobsArray = Object.entries(pdfDto.jobs).map(([name, amount]) => ({
-      name,
-      amount: amount.toFixed(2),
-    }));
-
-    const total = jobsArray.reduce(
-      (sum, job) => sum + parseFloat(job.amount),
-      0,
-    );
-
-    const invoiceDate = new Date().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-    const context = {
-      ...pdfDto,
-      jobs: jobsArray,
-      total: total.toFixed(2),
-      invoiceDate,
-    };
-
-    return this.template(context);
+    return this.template(pdfDto);
   }
 }

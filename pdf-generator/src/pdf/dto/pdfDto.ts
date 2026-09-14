@@ -1,4 +1,20 @@
-import { IsEmail, IsNotEmpty, IsObject, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+
+class JobItem {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsNumber()
+  amount: number;
+}
 
 export class PdfDto {
   @IsEmail()
@@ -19,6 +35,14 @@ export class PdfDto {
   @IsNotEmpty()
   companyName: string;
 
-  @IsObject()
-  jobs: Record<string, number>;
+  @IsArray()
+  @ValidateNested({ each: true })
+  jobs: JobItem[];
+
+  @IsNumber()
+  total: number;
+
+  @IsString()
+  @IsNotEmpty()
+  invoiceDate: string;
 }

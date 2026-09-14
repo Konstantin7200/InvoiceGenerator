@@ -12,7 +12,7 @@ import { PdfDto } from './dto/pdfDto';
 @Injectable()
 export class PdfService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PdfService.name);
-  private browser: Browser;
+  private browser!: Browser;
 
   constructor(private readonly htmlGenerator: HtmlGenerator) {}
 
