@@ -25,7 +25,8 @@ import redisConfig from './config/redis.config';
         REDIS_HOST: Joi.string().required(),
         REDIS_PORT: Joi.number().required(),
         REDIS_PASSWORD: Joi.string().optional(),
-        REDIS_TLS: Joi.string().optional(),
+        REDIS_TLS: Joi.string().required(),
+        DB_SSL: Joi.boolean().required(),
       }),
     }),
     BullModule.forRootAsync({

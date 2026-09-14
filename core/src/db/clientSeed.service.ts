@@ -13,7 +13,7 @@ export class ClientSeedService implements OnModuleInit {
   constructor(private readonly clientRepository: ClientRepository) {}
 
   async onModuleInit() {
-    const seedPath = path.join(__dirname, '..', 'config', 'clients.seed.json');
+    const seedPath = path.join(__dirname, '..', 'config', 'client.seed.json');
     if (!fs.existsSync(seedPath)) {
       return;
     }
