@@ -29,8 +29,7 @@ Configure the `.env` file with your database, Redis, and service URLs.
 | `DB_USERNAME` | yes | PostgreSQL username |
 | `DB_PASSWORD` | yes | PostgreSQL password |
 | `DB_NAME` | yes | PostgreSQL database name |
-| `PDF_API` | yes | PDF generator service URL (e.g. `http://localhost:3001`) |
-| `EMAIL_API` | yes | Email sender service URL (e.g. `http://localhost:3002`) |
+| `DB_SSL` | yes | Enable SSL for PostgreSQL (`true`/`false`) |
 | `REDIS_HOST` | yes | Redis host |
 | `REDIS_PORT` | yes | Redis port |
 | `REDIS_PASSWORD` | no | Redis password |
@@ -49,6 +48,10 @@ npm run start:dev
 npm run start:prod
 ```
 
+## Authentication
+
+All endpoints (except health check) require an `x-api-key` header. The guard validates the key against stored hashes in the database.
+
 ## API Endpoints
 
 ### Health Check
@@ -64,6 +67,7 @@ Returns `Hello World!` when the service is running.
 ```
 POST /client
 Content-Type: application/json
+x-api-key: YOUR_API_KEY
 ```
 
 ```json
@@ -84,6 +88,7 @@ Content-Type: application/json
 ```
 POST /invoice
 Content-Type: application/json
+x-api-key: YOUR_API_KEY
 ```
 
 ```json
@@ -121,26 +126,45 @@ npm run test:cov
 src/
 ├── main.ts                  # Application bootstrap
 ├── app.module.ts            # Root module (ConfigModule, BullModule, feature modules)
+├── app.controller.ts        # Health check
+├── app.service.ts
+├── auth/                    # API key authentication
+│   ├── auth.module.ts
+│   ├── auth.service.ts
+│   ├── auth.guard.ts        # x-api-key header guard
+│   └── hashFunction.ts
 ├── config/                  # Configuration files
 │   ├── server.config.ts
 │   ├── database.config.ts
 │   ├── redis.config.ts
-│   ├── api.config.ts
-│   └── constants.ts         # Queue names, timeouts, retry config
+│   ├── constants.ts         # Queue names, timeouts, retry config
+│   ├── client.seed.json
+│   └── client.seed.example.json
 ├── client/                  # Client management
 │   ├── client.controller.ts
 │   ├── client.service.ts
 │   ├── client.module.ts
 │   └── dto/
+│       └── client.dto.ts
 ├── invoice/                 # Invoice orchestration
 │   ├── invoice.controller.ts
 │   ├── invoice.service.ts
 │   ├── invoice.module.ts
 │   └── dto/
+│       └── createInvoice.dto.ts
 └── db/                      # Database layer
+    ├── db.module.ts
     ├── clientRepository.ts
+    ├── invoiceRepository.ts
+    ├── apiKeyRepository.ts
     ├── clientSeed.service.ts
+    ├── entities/
+    │   ├── clientEntity.ts
+    │   ├── invoiceEntity.ts
+    │   └── apiKeyEntity.ts
     └── types/
+        ├── client.ts
+        └── invoiceStatus.ts
 ```
 
 ## License

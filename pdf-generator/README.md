@@ -49,7 +49,7 @@ npm run start:prod
 
 ### Invoice Template
 
-The template at `templates/invoice.hbs` renders:
+The template is defined as an inline Handlebars string in `src/htmlGenerator/templates.ts` and renders:
 - Invoice header with date
 - Bill-to section with client name, email, company
 - Job breakdown table with amounts
@@ -85,20 +85,24 @@ npm run test:cov
 src/
 ├── main.ts                  # Application bootstrap
 ├── app.module.ts            # Root module (ConfigModule, BullModule, PdfModule)
+├── app.controller.ts        # Health check
+├── app.service.ts
 ├── config/                  # Configuration files
 │   ├── server.config.ts
 │   ├── redis.config.ts
 │   └── constants.ts
 ├── pdf/                     # PDF generation
 │   ├── pdf.worker.ts        # BullMQ processor
-│   ├── pdf.service.ts       # PDF creation logic
+│   ├── pdf.service.ts       # PDF creation logic (Puppeteer)
 │   ├── pdf.module.ts
-│   └── dto/
+│   ├── dto/
+│   │   └── pdfDto.ts
+│   └── pipes/
+│       └── bullmq-validation.pipe.ts
 ├── htmlGenerator/           # HTML rendering
 │   ├── htmlGenerator.ts     # Handlebars template compiler
-│   └── htmlGenerator.module.ts
-└── templates/
-    └── invoice.hbs          # Handlebars invoice template
+│   ├── htmlGenerator.module.ts
+│   └── templates.ts         # Inline Handlebars invoice template
 ```
 
 ## License

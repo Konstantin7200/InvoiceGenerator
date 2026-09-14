@@ -5,17 +5,22 @@ A microservices-based invoice generation system built with NestJS. Automatically
 ## Architecture
 
 ```
-┌──────────┐     ┌───────────────┐     ┌───────────────┐
-│          │────▶│     core      │────▶│ pdf-generator │
-│  Client  │     │  (port 3000)  │     │  (port 3001)  │
-│          │     │               │     └───────────────┘
-└──────────┘     │  PostgreSQL   │
-                 │  BullMQ       │────▶┌───────────────┐
-                 │  Orchestrator │     │ email-sender  │
-                 └───────────────┘     │  (port 3002)  │
-                                       │  Maileroo     │
-                                       └───────────────┘
-                        Redis (BullMQ queues)
+┌──────────┐     ┌───────────────┐
+│          │────▶│     core      │
+│  Client  │     │  (port 3000)  │
+│          │     │  PostgreSQL   │
+└──────────┘     └───────┬───────┘
+                         │
+              ┌──────────┴──────────┐
+              │   Redis (BullMQ)    │
+              └──┬──────────────┬───┘
+                 │              │
+                 ▼              ▼
+     ┌───────────────┐  ┌───────────────┐
+     │ pdf-generator │  │ email-sender  │
+     │  (port 3001)  │  │  (port 3002)  │
+     │  Puppeteer    │  │  Maileroo     │
+     └───────────────┘  └───────────────┘
 ```
 
 ## Services
@@ -63,6 +68,7 @@ cd email-sender && npm run start:dev
 # Create a client
 curl -X POST http://localhost:3000/client \
   -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
   -d '{
     "firstName": "John",
     "lastName": "Doe",
@@ -74,6 +80,7 @@ curl -X POST http://localhost:3000/client \
 # Generate and send an invoice
 curl -X POST http://localhost:3000/invoice \
   -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
   -d '{
     "email": "john@example.com",
     "jobs": {
@@ -87,10 +94,18 @@ curl -X POST http://localhost:3000/invoice \
 
 1. A client is registered via `POST /client` and stored in PostgreSQL
 2. An invoice is requested via `POST /invoice` with a client email and job amounts
-3. The **core** service looks up the client and dispatches a PDF generation job to the `pdf` BullMQ queue
-4. The **pdf-generator** service picks up the job, renders the Handlebars template to HTML, converts it to PDF with Puppeteer, and returns the buffer
-5. The **core** service dispatches an email job to the `email` BullMQ queue with the PDF buffer
+3. The **core** service looks up the client, creates an invoice record, and dispatches a PDF generation job to the `pdf` BullMQ queue via Redis
+4. The **pdf-generator** service picks up the job, renders the Handlebars template to HTML, converts it to PDF with Puppeteer, and returns the buffer via the queue
+5. The **core** service receives the PDF, then dispatches an email job to the `email` BullMQ queue via Redis with the PDF buffer
 6. The **email-sender** service picks up the job and sends the invoice email with the PDF attached via Maileroo
+
+## Authentication
+
+All API endpoints require an `x-api-key` header. API keys are generated and stored in the database. Include the header in every request:
+
+```
+x-api-key: YOUR_API_KEY
+```
 
 ## Environment Variables
 
@@ -108,8 +123,7 @@ Each service has its own `.env.example`. See individual READMEs for details.
 | `DB_USERNAME` | yes | | | PostgreSQL username |
 | `DB_PASSWORD` | yes | | | PostgreSQL password |
 | `DB_NAME` | yes | | | PostgreSQL database name |
-| `PDF_API` | yes | | | PDF generator service URL |
-| `EMAIL_API` | yes | | | Email sender service URL |
+| `DB_SSL` | yes | | | Enable SSL for PostgreSQL |
 | `MAILEROO_API_KEY` | | | yes | Maileroo API key |
 | `EMAIL_FROM` | | | yes | Sender email address |
 
