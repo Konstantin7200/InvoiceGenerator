@@ -19,3 +19,5 @@ export const EMAIL_QUEUE_MAX_ATTEMPTS = 5;
 export const EMAIL_QUEUE_BACKOFF_DELAY_MS = 1000;
 
 export const BACKOFF_TYPE = 'exponential';
+
+export const PG_UNIQUE_CONSTRAINT_VIOLATION = '23505';

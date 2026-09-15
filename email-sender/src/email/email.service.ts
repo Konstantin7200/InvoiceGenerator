@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailerooService } from '../maileroo/maileroo.service';
 
@@ -28,10 +32,9 @@ export class EmailService {
           },
         ],
       });
-      if(!result.success)
-      {
+      if (!result.success) {
         this.logger.error(result);
-        throw new Error("Maileroo sent not success");
+        throw new Error('Maileroo sent not success');
       }
     } catch (error) {
       this.logger.error('Failed to send email', error.stack);

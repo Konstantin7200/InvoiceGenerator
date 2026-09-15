@@ -39,7 +39,7 @@ export class InvoiceService {
     const clientFromDb = await this.clientRepository.getOne(email);
     if (clientFromDb === null) throw new NotFoundException('Client not found');
 
-    const { id, ...client } = clientFromDb;
+    const { firstName, lastName, companyEmail, companyName } = clientFromDb;
     const invoiceFromDb = await this.invoiceRepository.createInvoice({
       email,
       jobs,
@@ -59,7 +59,11 @@ export class InvoiceService {
       });
 
       const pdfJob = await this.pdfQueue.add(JOB_TYPE_GENERATE_PDF, {
-        ...client,
+        firstName,
+        lastName,
+        email,
+        companyEmail,
+        companyName,
         jobs: jobsArray,
         total,
         invoiceDate,
