@@ -1,10 +1,13 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class EmailDto {
+  @IsNumber()
+  invoiceId!: number;
+
   @IsEmail()
   email: string;
 
   @IsString()
   @IsNotEmpty()
-  file: string;
+  pdfKey: string;
 }

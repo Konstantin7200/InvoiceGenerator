@@ -21,4 +21,7 @@ export class InvoiceRepository {
   async updateStatus(id: number, status: InvoiceStatus) {
     return this.repo.update(id, { status });
   }
+  async getOne(key: string) {
+    return this.repo.findOneBy({ key: key });
+  }
 }

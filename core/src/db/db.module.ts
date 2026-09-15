@@ -14,6 +14,8 @@ import {
 } from '../config/constants';
 import { ApiKeyRepository } from './apiKeyRepository';
 import { ApiKeyEntity } from './entities/apiKeyEntity';
+import { InternalApiKeyEntity } from './entities/internalApiKeyEntity';
+import { InternalApiKeyRepository } from './internalApiKeyRepository';
 
 @Module({
   imports: [
@@ -30,21 +32,37 @@ import { ApiKeyEntity } from './entities/apiKeyEntity';
           configService.get('database.ssl') === 'true'
             ? { rejectUnauthorized: false }
             : undefined,
-        entities: [ClientEntity, InvoiceEntity, ApiKeyEntity],
+        entities: [
+          ClientEntity,
+          InvoiceEntity,
+          ApiKeyEntity,
+          InternalApiKeyEntity,
+        ],
         synchronize: true,
         retryAttempts: DB_RETRY_ATTEMPTS,
         retryDelay: DB_RETRY_DELAY_MS,
         connectTimeoutMS: DB_CONNECT_TIMEOUT_MS,
       }),
     }),
-    TypeOrmModule.forFeature([ClientEntity, InvoiceEntity, ApiKeyEntity]),
+    TypeOrmModule.forFeature([
+      ClientEntity,
+      InvoiceEntity,
+      ApiKeyEntity,
+      InternalApiKeyEntity,
+    ]),
   ],
   providers: [
     ClientRepository,
     InvoiceRepository,
     ClientSeedService,
     ApiKeyRepository,
+    InternalApiKeyRepository,
   ],
-  exports: [ClientRepository, InvoiceRepository, ApiKeyRepository],
+  exports: [
+    ClientRepository,
+    InvoiceRepository,
+    ApiKeyRepository,
+    InternalApiKeyRepository,
+  ],
 })
 export class DatabaseModule {}

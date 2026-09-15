@@ -19,6 +19,9 @@ class JobItem {
 }
 
 export class PdfDto {
+  @IsNumber()
+  invoiceId!: number;
+
   @IsEmail()
   email!: string;
 

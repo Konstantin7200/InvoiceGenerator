@@ -14,6 +14,8 @@ export class InvoiceEntity {
   id!: number;
   @Column()
   jobs!: Record<string, number>;
+  @Column({ type: 'uuid', unique: true, generated: 'uuid' })
+  key!: string;
   @Column({ type: 'text', default: 'pending' })
   status!: InvoiceStatus;
   @OneToOne(() => ClientEntity)

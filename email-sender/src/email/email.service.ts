@@ -14,9 +14,10 @@ export class EmailService {
     private readonly mailerooService: MailerooService,
   ) {}
 
-  async sendEmail(email: string, file: string) {
+  async sendEmail(email: string, pdfBuffer: Buffer) {
     try {
       const from = this.configService.get<string>('email.from')!;
+      const file = pdfBuffer.toString('base64');
 
       const result = await this.mailerooService.sendEmail({
         from: { address: from },

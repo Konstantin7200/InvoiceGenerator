@@ -19,6 +19,13 @@ import redisConfig from './config/redis.config';
         REDIS_PORT: Joi.number().required(),
         REDIS_PASSWORD: Joi.string().optional(),
         REDIS_TLS: Joi.string().required(),
+        CORE_API_URL: Joi.string().uri().required(),
+        INTERNAL_API_KEY: Joi.string().required(),
+        B2_ENDPOINT: Joi.string().uri().required(),
+        B2_REGION: Joi.string().required(),
+        B2_ACCESS_KEY_ID: Joi.string().required(),
+        B2_SECRET_ACCESS_KEY: Joi.string().required(),
+        B2_BUCKET_NAME: Joi.string().required(),
       }),
     }),
     BullModule.forRootAsync({
