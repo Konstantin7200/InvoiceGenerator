@@ -50,7 +50,9 @@ npm run start:prod
 
 ## Authentication
 
-All endpoints (except health check) require an `x-api-key` header. The guard validates the key against stored hashes in the database.
+All endpoints (except health check and `GET /invoice/:id`) require an `x-api-key` header. The guard validates the key against stored hashes in the database.
+
+Internal service-to-service endpoints (`PATCH /invoice/internal/:id`) use a separate internal API key validated against the `InternalApiKeyRepository`.
 
 ## API Endpoints
 
@@ -101,11 +103,39 @@ x-api-key: YOUR_API_KEY
 }
 ```
 
-- `200` — Invoice created and sent
+- `200` — Invoice created, returns `{ "id": "<key>", "status": "pending" }`
 - `404` — Client not found
 - `500` — Failed to process invoice
 
 The `jobs` field is a map of job names to amounts in dollars.
+
+### Get Invoice Status
+
+```
+GET /invoice/:id
+```
+
+- `200` — Returns `{ "id": "<key>", "status": "<status>" }` where status is `"pending"`, `"resolved"`, or `"rejected"`
+- `404` — Invoice not found
+
+### Update Invoice Status (Internal)
+
+```
+PATCH /invoice/internal/:id
+Content-Type: application/json
+x-api-key: INTERNAL_API_KEY
+```
+
+```json
+{
+  "status": "resolved"
+}
+```
+
+Internal endpoint used by the pdf-generator and email-sender services to report status back to the core. Protected by a separate internal API key.
+
+- `200` — Status updated
+- `401` — Invalid internal API key
 
 ## Testing
 
@@ -132,6 +162,7 @@ src/
 │   ├── auth.module.ts
 │   ├── auth.service.ts
 │   ├── auth.guard.ts        # x-api-key header guard
+│   ├── internal-auth.guard.ts # Internal service-to-service guard
 │   └── hashFunction.ts
 ├── config/                  # Configuration files
 │   ├── server.config.ts
@@ -157,11 +188,13 @@ src/
     ├── clientRepository.ts
     ├── invoiceRepository.ts
     ├── apiKeyRepository.ts
+    ├── internalApiKeyRepository.ts
     ├── clientSeed.service.ts
     ├── entities/
     │   ├── clientEntity.ts
     │   ├── invoiceEntity.ts
-    │   └── apiKeyEntity.ts
+    │   ├── apiKeyEntity.ts
+    │   └── internalApiKeyEntity.ts
     └── types/
         ├── client.ts
         └── invoiceStatus.ts

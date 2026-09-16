@@ -1,6 +1,6 @@
 # Email Sender Service
 
-A BullMQ worker microservice that sends invoice emails with PDF attachments. Consumes jobs from the `email` queue and delivers emails via the [Maileroo](https://maileroo.com/) SMTP API.
+A BullMQ worker microservice that sends invoice emails with PDF attachments. Consumes jobs from the `email` queue, downloads the PDF from **Backblaze B2** storage, and delivers emails via the [Maileroo](https://maileroo.com/) SMTP API. After sending, it calls back to the core service to update the invoice status.
 
 ## Prerequisites
 
@@ -28,6 +28,13 @@ Configure the `.env` file with your Maileroo credentials and Redis connection.
 | `REDIS_PORT` | yes | Redis port |
 | `REDIS_PASSWORD` | no | Redis password |
 | `REDIS_TLS` | no | Set to `true` to enable TLS |
+| `CORE_API_URL` | yes | Core service URL (for status callbacks) |
+| `INTERNAL_API_KEY` | yes | Internal API key for service-to-service auth |
+| `B2_ENDPOINT` | yes | Backblaze B2 S3 endpoint |
+| `B2_REGION` | yes | Backblaze B2 region |
+| `B2_ACCESS_KEY_ID` | yes | Backblaze B2 access key ID |
+| `B2_SECRET_ACCESS_KEY` | yes | Backblaze B2 secret access key |
+| `B2_BUCKET_NAME` | yes | Backblaze B2 bucket name |
 
 ## Run
 
@@ -45,8 +52,11 @@ npm run start:prod
 ## How It Works
 
 1. Listens for jobs on the `email` BullMQ queue
-2. Validates incoming job data (recipient email, base64 PDF content)
-3. Sends an email via the Maileroo API with the PDF attached as `invoice.pdf`
+2. Validates incoming job data (invoice ID, recipient email, B2 PDF key)
+3. Downloads the PDF from **Backblaze B2** using the provided key
+4. Sends an email via the Maileroo API with the PDF attached as `invoice.pdf`
+5. Deletes the PDF from **Backblaze B2** (no longer needed)
+6. Calls back to the core service via `PATCH /invoice/internal/:id` to mark the invoice as `resolved`
 
 ### Email Content
 
@@ -91,6 +101,8 @@ src/
 ├── email/                   # Email processing
 │   ├── email.worker.ts      # BullMQ processor
 │   ├── email.service.ts     # Email sending logic
+│   ├── b2.service.ts        # Backblaze B2 download/delete
+│   ├── callback.service.ts  # Callback to core service
 │   ├── email.module.ts
 │   ├── dto/
 │   └── pipes/

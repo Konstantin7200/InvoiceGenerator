@@ -20,7 +20,13 @@ A microservices-based invoice generation system built with NestJS. Automatically
      │ pdf-generator │  │ email-sender  │
      │  (port 3001)  │  │  (port 3002)  │
      │  Puppeteer    │  │  Maileroo     │
-     └───────────────┘  └───────────────┘
+     └───────┬───────┘  └───────┬───────┘
+             │                  │
+             ▼                  │
+     ┌───────────────┐          │
+     │ Backblaze B2  │◀─────────┘
+     │  (PDF store)  │
+     └───────────────┘
 ```
 
 ## Services
@@ -93,11 +99,11 @@ curl -X POST http://localhost:3000/invoice \
 ## How It Works
 
 1. A client is registered via `POST /client` and stored in PostgreSQL
-2. An invoice is requested via `POST /invoice` with a client email and job amounts
+2. An invoice is requested via `POST /invoice` with a client email and job amounts — returns `{ id, status: "pending" }`
 3. The **core** service looks up the client, creates an invoice record, and dispatches a PDF generation job to the `pdf` BullMQ queue via Redis
-4. The **pdf-generator** service picks up the job, renders the Handlebars template to HTML, converts it to PDF with Puppeteer, and returns the buffer via the queue
-5. The **core** service receives the PDF, then dispatches an email job to the `email` BullMQ queue via Redis with the PDF buffer
-6. The **email-sender** service picks up the job and sends the invoice email with the PDF attached via Maileroo
+4. The **pdf-generator** service picks up the job, renders the Handlebars template to HTML, converts it to PDF with Puppeteer, uploads the PDF to **Backblaze B2**, and dispatches an email job to the `email` BullMQ queue via Redis
+5. The **email-sender** service picks up the job, downloads the PDF from **Backblaze B2**, sends the invoice email with the PDF attached via Maileroo, deletes the PDF from B2, and calls back to the core service to mark the invoice as `resolved`
+6. The invoice status can be queried via `GET /invoice/:id` at any time
 
 ## Authentication
 
@@ -124,8 +130,15 @@ Each service has its own `.env.example`. See individual READMEs for details.
 | `DB_PASSWORD` | yes | | | PostgreSQL password |
 | `DB_NAME` | yes | | | PostgreSQL database name |
 | `DB_SSL` | yes | | | Enable SSL for PostgreSQL |
+| `CORE_API_URL` | | yes | yes | Core service URL (for callbacks) |
+| `INTERNAL_API_KEY` | | yes | yes | Internal API key for service-to-service auth |
 | `MAILEROO_API_KEY` | | | yes | Maileroo API key |
 | `EMAIL_FROM` | | | yes | Sender email address |
+| `B2_ENDPOINT` | | yes | yes | Backblaze B2 S3 endpoint |
+| `B2_REGION` | | yes | yes | Backblaze B2 region |
+| `B2_ACCESS_KEY_ID` | | yes | yes | Backblaze B2 access key ID |
+| `B2_SECRET_ACCESS_KEY` | | yes | yes | Backblaze B2 secret access key |
+| `B2_BUCKET_NAME` | | yes | yes | Backblaze B2 bucket name |
 
 ## License
 

@@ -76,7 +76,11 @@ paths:
               $ref: '#/components/schemas/CreateInvoiceDto'
       responses:
         '200':
-          description: Invoice created and sent successfully
+          description: Invoice created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateInvoiceResponse'
         '404':
           description: Client not found
           content:
@@ -90,6 +94,66 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /invoice/{id}:
+    get:
+      summary: Get invoice status
+      description: Returns the current status of an invoice by its public key.
+      operationId: getInvoiceStatus
+      tags:
+        - Invoice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The invoice public key
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Invoice status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceStatusResponse'
+        '404':
+          description: Invoice not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /invoice/internal/{id}:
+    patch:
+      summary: Update invoice status (internal)
+      description: >
+        Internal endpoint used by the pdf-generator and email-sender services
+        to report status back to the core. Protected by a separate internal API key.
+      operationId: updateInvoiceStatus
+      tags:
+        - Invoice
+      security:
+        - InternalApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The invoice numeric database ID
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateInvoiceStatusDto'
+      responses:
+        '200':
+          description: Status updated successfully
+        '401':
+          description: Invalid internal API key
+        '404':
+          description: Invoice not found
+
 components:
   securitySchemes:
     ApiKeyAuth:
@@ -97,6 +161,11 @@ components:
       in: header
       name: x-api-key
       description: API key for authentication. Required for /client and /invoice endpoints.
+    InternalApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Internal API key for service-to-service authentication. Required for /invoice/internal endpoints.
 
   schemas:
     Client:
@@ -141,12 +210,58 @@ components:
           example: john@example.com
         jobs:
           type: object
-          description: Map of job names to their amounts in dollars
+          description: Map of job names to their amounts in dollars (values must be >= 0)
           additionalProperties:
             type: number
           example:
             Web Development: 1500.00
             UI Design: 800.50
+
+    CreateInvoiceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Invoice public key
+          example: 550e8400-e29b-41d4-a716-446655440000
+        status:
+          type: string
+          description: Invoice status
+          enum:
+            - pending
+            - resolved
+            - rejected
+          example: pending
+
+    InvoiceStatusResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Invoice public key
+          example: 550e8400-e29b-41d4-a716-446655440000
+        status:
+          type: string
+          description: Invoice status
+          enum:
+            - pending
+            - resolved
+            - rejected
+          example: pending
+
+    UpdateInvoiceStatusDto:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          description: New invoice status
+          enum:
+            - pending
+            - resolved
+            - rejected
+          example: resolved
 
     Error:
       type: object
