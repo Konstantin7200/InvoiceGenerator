@@ -11,7 +11,7 @@ import { InvoiceService } from './invoice.service';
 import { CreateInvoiceDto } from './dto/createInvoice.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { InternalAuthGuard } from 'src/auth/internal-auth.guard';
-import { InvoiceStatus } from 'src/db/types/invoiceStatus';
+import type { InvoiceStatus } from 'src/db/types/invoiceStatus';
 
 @Controller('invoice')
 export class InvoiceController {
@@ -28,7 +28,7 @@ export class InvoiceController {
   @Get(':id')
   async getInvoiceStatus(@Param('id') id: string) {
     const result = await this.invoiceService.getInvoiceStatus(id);
-    return result;
+    return { id: id, status: result };
   }
   @Patch('internal/:id')
   @UseGuards(InternalAuthGuard)

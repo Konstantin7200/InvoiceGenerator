@@ -7,12 +7,14 @@ import { AppService } from './app.service';
 import { PdfModule } from './pdf/pdf.module';
 import serverConfig from './config/server.config';
 import redisConfig from './config/redis.config';
+import b2Config from './config/b2.config';
+import coreConfig from './config/core.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [serverConfig, redisConfig],
+      load: [serverConfig, redisConfig, b2Config, coreConfig],
       validationSchema: Joi.object({
         PORT: Joi.number().required(),
         REDIS_HOST: Joi.string().required(),

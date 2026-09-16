@@ -38,7 +38,6 @@ import { InternalApiKeyRepository } from './internalApiKeyRepository';
           ApiKeyEntity,
           InternalApiKeyEntity,
         ],
-        synchronize: true,
         retryAttempts: DB_RETRY_ATTEMPTS,
         retryDelay: DB_RETRY_DELAY_MS,
         connectTimeoutMS: DB_CONNECT_TIMEOUT_MS,

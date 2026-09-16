@@ -1,11 +1,11 @@
-import { IsEmail, IsNumber, IsObject, Min } from 'class-validator';
+import { IsEmail, IsObject } from 'class-validator';
+import { IsValidJobs } from './jobs.validator';
 
 export class CreateInvoiceDto {
   @IsEmail()
   email!: string;
 
   @IsObject()
-  @IsNumber({}, { each: true })
-  @Min(0, { each: true })
+  @IsValidJobs()
   jobs!: Record<string, number>;
 }

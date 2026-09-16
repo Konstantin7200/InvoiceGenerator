@@ -14,17 +14,15 @@ export class B2Service {
 
   constructor(private readonly configService: ConfigService) {
     this.s3 = new S3Client({
-      endpoint: this.configService.get<string>('B2_ENDPOINT'),
-      region: this.configService.get<string>('B2_REGION'),
+      endpoint: this.configService.get<string>('b2.endpoint')!,
+      region: this.configService.get<string>('b2.region')!,
       credentials: {
-        accessKeyId: this.configService.get<string>('B2_ACCESS_KEY_ID'),
-        secretAccessKey: this.configService.get<string>(
-          'B2_SECRET_ACCESS_KEY',
-        ),
+        accessKeyId: this.configService.get<string>('b2.accessKeyId')!,
+        secretAccessKey: this.configService.get<string>('b2.secretAccessKey')!,
       },
       forcePathStyle: true,
     });
-    this.bucket = this.configService.get<string>('B2_BUCKET_NAME');
+    this.bucket = this.configService.get<string>('b2.bucketName')!;
   }
 
   async download(key: string): Promise<Buffer> {
@@ -34,7 +32,7 @@ export class B2Service {
         Key: key,
       }),
     );
-    const stream = response.Body;
+    const stream = response.Body!;
     return Buffer.from(await stream.transformToByteArray());
   }
 

@@ -7,6 +7,7 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 class JobItem {
   @IsString()
@@ -42,6 +43,7 @@ export class PdfDto {
 
   @IsArray()
   @ValidateNested({ each: true })
+  @Type(() => JobItem)
   jobs!: JobItem[];
 
   @IsNumber()

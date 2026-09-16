@@ -7,13 +7,15 @@ import { EmailModule } from './email/email.module';
 import serverConfig from './config/server.config';
 import emailConfig from './config/email.config';
 import redisConfig from './config/redis.config';
+import b2Config from './config/b2.config';
+import coreConfig from './config/core.config';
 import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [serverConfig, emailConfig, redisConfig],
+      load: [serverConfig, emailConfig, redisConfig, b2Config, coreConfig],
       validationSchema: Joi.object({
         PORT: Joi.number().required(),
         MAILEROO_API_KEY: Joi.string().required(),

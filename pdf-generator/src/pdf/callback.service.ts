@@ -8,8 +8,10 @@ export class CallbackService {
   private readonly internalApiKey: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.coreApiUrl = this.configService.get<string>('CORE_API_URL');
-    this.internalApiKey = this.configService.get<string>('INTERNAL_API_KEY');
+    this.coreApiUrl = this.configService.get<string>('core.apiUrl')!;
+    this.internalApiKey = this.configService.get<string>(
+      'core.internalApiKey',
+    )!;
   }
 
   async updateStatus(invoiceId: number, status: string): Promise<void> {

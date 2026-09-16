@@ -1,15 +1,8 @@
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { ClientRepository } from '../db/clientRepository';
-import {
-  PDF_QUEUE_NAME,
-  JOB_TYPE_GENERATE_PDF,
-} from '../config/constants';
+import { PDF_QUEUE_NAME, JOB_TYPE_GENERATE_PDF } from '../config/constants';
 import { InvoiceRepository } from 'src/db/invoiceRepository';
 import { InvoiceStatus } from 'src/db/types/invoiceStatus';
 
@@ -58,7 +51,7 @@ export class InvoiceService {
       invoiceDate,
     });
 
-    return { id: invoiceFromDb.id };
+    return { id: invoiceFromDb.key };
   }
 
   async updateStatus(id: number, status: InvoiceStatus) {

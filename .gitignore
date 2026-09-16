@@ -8,3 +8,5 @@ dist/
 !tsconfig.json
 !tsconfig.build.json
 coverage/
+.env.local
+.env.remote
