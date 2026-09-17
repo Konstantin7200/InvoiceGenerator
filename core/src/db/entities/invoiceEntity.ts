@@ -1,5 +1,6 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -18,6 +19,8 @@ export class InvoiceEntity {
   key!: string;
   @Column({ type: 'text', default: 'pending' })
   status!: InvoiceStatus;
+  @CreateDateColumn()
+  createdAt!: Date;
   @ManyToOne(() => ClientEntity)
   @JoinColumn({ name: 'clientEmail', referencedColumnName: 'email' })
   client!: ClientEntity;

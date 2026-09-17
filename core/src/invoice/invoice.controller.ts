@@ -23,12 +23,22 @@ export class InvoiceController {
       createInvoiceDto.email,
       createInvoiceDto.jobs,
     );
-    return { id: result.id, status: 'pending' };
+    return {
+      id: result.id,
+      status: 'pending',
+      ...(result.duplicate && { duplicate: true }),
+    };
   }
   @Get(':id')
   async getInvoiceStatus(@Param('id') id: string) {
     const result = await this.invoiceService.getInvoiceStatus(id);
     return { id: id, status: result };
+  }
+  @Get('internal/:id')
+  @UseGuards(InternalAuthGuard)
+  async getInvoiceStatusById(@Param('id') id: string) {
+    const result = await this.invoiceService.getInvoiceStatusById(Number(id));
+    return { status: result };
   }
   @Patch('internal/:id')
   @UseGuards(InternalAuthGuard)
@@ -37,5 +47,11 @@ export class InvoiceController {
     @Body('status') status: InvoiceStatus,
   ) {
     await this.invoiceService.updateStatus(Number(id), status);
+  }
+  @Patch('cron/expire-stale')
+  @UseGuards(InternalAuthGuard)
+  async expireStaleInvoices() {
+    const count = await this.invoiceService.expireStaleInvoices();
+    return { expired: count };
   }
 }

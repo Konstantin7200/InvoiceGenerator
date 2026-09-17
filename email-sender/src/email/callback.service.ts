@@ -37,4 +37,31 @@ export class CallbackService {
       this.logger.error('Failed to update invoice status', error.stack);
     }
   }
+
+  async getStatus(invoiceId: number): Promise<string | null> {
+    try {
+      const response = await fetch(
+        `${this.coreApiUrl}/invoice/internal/${invoiceId}`,
+        {
+          method: 'GET',
+          headers: {
+            'x-api-key': this.internalApiKey,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        this.logger.error(
+          `Failed to get invoice status: ${response.status} ${response.statusText}`,
+        );
+        return null;
+      }
+
+      const data = await response.json();
+      return data.status ?? null;
+    } catch (error) {
+      this.logger.error('Failed to get invoice status', error.stack);
+      return null;
+    }
+  }
 }

@@ -19,6 +19,12 @@ cp .env.example .env
 
 Configure the `.env` file with your database, Redis, and service URLs.
 
+Run the database migration for the `createdAt` column:
+
+```sql
+ALTER TABLE invoice_entity ADD COLUMN created_at TIMESTAMP DEFAULT NOW();
+```
+
 ## Environment Variables
 
 | Variable | Required | Description |
@@ -50,9 +56,18 @@ npm run start:prod
 
 ## Authentication
 
-All endpoints (except health check and `GET /invoice/:id`) require an `x-api-key` header. The guard validates the key against stored hashes in the database.
+All endpoints (except health check, `GET /invoice/:id`, and internal endpoints) require an `x-api-key` header. The guard validates the key against stored hashes in the database.
 
-Internal service-to-service endpoints (`PATCH /invoice/internal/:id`) use a separate internal API key validated against the `InternalApiKeyRepository`.
+Internal service-to-service endpoints (`/invoice/internal/*` and `/invoice/cron/*`) use a separate internal API key validated against the `InternalApiKeyRepository`.
+
+## Invoice Statuses
+
+| Status | Description |
+|---|---|
+| `pending` | Invoice created, awaiting processing |
+| `resolved` | Email successfully sent to the client |
+| `expired` | Invoice was not processed within 24 hours (set by cron) |
+| `closed` | All retry attempts exhausted, processing permanently stopped |
 
 ## API Endpoints
 
@@ -104,10 +119,11 @@ x-api-key: YOUR_API_KEY
 ```
 
 - `200` — Invoice created, returns `{ "id": "<key>", "status": "pending" }`
+- `200` — Duplicate detected, returns `{ "id": "<key>", "status": "pending", "duplicate": true }`
 - `404` — Client not found
 - `500` — Failed to process invoice
 
-The `jobs` field is a map of job names to amounts in dollars.
+The `jobs` field is a map of job names to amounts in dollars. Duplicate requests within 40 seconds return the existing invoice.
 
 ### Get Invoice Status
 
@@ -115,8 +131,21 @@ The `jobs` field is a map of job names to amounts in dollars.
 GET /invoice/:id
 ```
 
-- `200` — Returns `{ "id": "<key>", "status": "<status>" }` where status is `"pending"`, `"resolved"`, or `"rejected"`
+- `200` — Returns `{ "id": "<key>", "status": "<status>" }` where status is `"pending"`, `"resolved"`, `"expired"`, or `"closed"`
 - `404` — Invoice not found
+
+### Get Invoice Status by Numeric ID (Internal)
+
+```
+GET /invoice/internal/:id
+x-api-key: INTERNAL_API_KEY
+```
+
+- `200` — Returns `{ "status": "<status>" }`
+- `401` — Invalid internal API key
+- `404` — Invoice not found
+
+Internal endpoint used by workers to check invoice status before processing.
 
 ### Update Invoice Status (Internal)
 
@@ -136,6 +165,18 @@ Internal endpoint used by the pdf-generator and email-sender services to report 
 
 - `200` — Status updated
 - `401` — Invalid internal API key
+
+### Expire Stale Invoices (Cron)
+
+```
+PATCH /invoice/cron/expire-stale
+x-api-key: INTERNAL_API_KEY
+```
+
+- `200` — Returns `{ "expired": <count> }` where count is the number of invoices expired
+- `401` — Invalid internal API key
+
+Marks all invoices with status `pending` that are older than 24 hours as `expired`. Call this from an external cron service.
 
 ## Testing
 
@@ -168,7 +209,7 @@ src/
 │   ├── server.config.ts
 │   ├── database.config.ts
 │   ├── redis.config.ts
-│   ├── constants.ts         # Queue names, timeouts, retry config
+│   ├── constants.ts         # Queue names, timeouts, retry config, dedup TTLs
 │   ├── client.seed.json
 │   └── client.seed.example.json
 ├── client/                  # Client management

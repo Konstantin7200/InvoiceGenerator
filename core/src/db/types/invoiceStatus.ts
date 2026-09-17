@@ -1,1 +1,1 @@
-export type InvoiceStatus = 'rejected' | 'pending' | 'resolved';
+export type InvoiceStatus = 'pending' | 'resolved' | 'expired' | 'closed';

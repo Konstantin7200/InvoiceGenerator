@@ -15,7 +15,8 @@ export const PDF_QUEUE_BACKOFF_DELAY_MS = 2000;
 export const EMAIL_QUEUE_MAX_ATTEMPTS = 5;
 export const EMAIL_QUEUE_BACKOFF_DELAY_MS = 1000;
 
-export const BACKOFF_TYPE = 'exponential';
+export const DEDUP_TTL_SECONDS = 40;
+export const EMAIL_DEDUP_TTL_SECONDS = 300;
 
 export const PG_UNIQUE_CONSTRAINT_VIOLATION = '23505';
 

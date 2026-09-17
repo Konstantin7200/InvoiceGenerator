@@ -55,7 +55,13 @@ cd ../email-sender && npm install
 
 2. Configure environment variables — copy `.env.example` to `.env` in each service directory and fill in the values.
 
-3. Start each service (in separate terminals):
+3. Run the database migration for the `createdAt` column:
+
+```sql
+ALTER TABLE invoice_entity ADD COLUMN created_at TIMESTAMP DEFAULT NOW();
+```
+
+4. Start each service (in separate terminals):
 
 ```bash
 # Terminal 1 — Core (start first, it depends on the others)
@@ -68,7 +74,7 @@ cd pdf-generator && npm run start:dev
 cd email-sender && npm run start:dev
 ```
 
-4. Create a client and generate an invoice:
+5. Create a client and generate an invoice:
 
 ```bash
 # Create a client
@@ -99,11 +105,32 @@ curl -X POST http://localhost:3000/invoice \
 ## How It Works
 
 1. A client is registered via `POST /client` and stored in PostgreSQL
-2. An invoice is requested via `POST /invoice` with a client email and job amounts — returns `{ id, status: "pending" }`
+2. An invoice is requested via `POST /invoice` with a client email and job amounts
+   - Returns `{ "id": "<key>", "status": "pending" }` for new invoices
+   - Returns `{ "id": "<key>", "status": "pending", "duplicate": true }` if a duplicate request is detected within 40 seconds
 3. The **core** service looks up the client, creates an invoice record, and dispatches a PDF generation job to the `pdf` BullMQ queue via Redis
-4. The **pdf-generator** service picks up the job, renders the Handlebars template to HTML, converts it to PDF with Puppeteer, uploads the PDF to **Backblaze B2**, and dispatches an email job to the `email` BullMQ queue via Redis
-5. The **email-sender** service picks up the job, downloads the PDF from **Backblaze B2**, sends the invoice email with the PDF attached via Maileroo, deletes the PDF from B2, and calls back to the core service to mark the invoice as `resolved`
+4. The **pdf-generator** service picks up the job, checks the invoice status (skips if `expired` or `closed`), renders the Handlebars template to HTML, converts it to PDF with Puppeteer, uploads the PDF to **Backblaze B2**, and dispatches an email job to the `email` BullMQ queue via Redis
+5. The **email-sender** service picks up the job, checks the invoice status (skips if `expired` or `closed`), checks for duplicate sends via Redis, downloads the PDF from **Backblaze B2**, sends the invoice email with the PDF attached via Maileroo, deletes the PDF from B2, and calls back to the core service to mark the invoice as `resolved`
 6. The invoice status can be queried via `GET /invoice/:id` at any time
+
+## Invoice Statuses
+
+| Status | Description |
+|---|---|
+| `pending` | Invoice created, awaiting processing |
+| `resolved` | Email successfully sent to the client |
+| `expired` | Invoice was not processed within 24 hours (set by cron) |
+| `closed` | All retry attempts exhausted, processing permanently stopped |
+
+## Idempotency
+
+- **Invoice creation**: Duplicate requests within 40 seconds return the existing invoice with `"duplicate": true`
+- **Email sending**: Redis-based dedup prevents duplicate emails from BullMQ retries (5-minute window)
+- **Worker guards**: Both PDF and email workers check invoice status before processing, skipping `expired` and `closed` invoices
+
+## Cron
+
+A `PATCH /invoice/cron/expire-stale` endpoint (protected by internal API key) marks invoices pending for over 24 hours as `expired`. Call this from an external cron service.
 
 ## Authentication
 

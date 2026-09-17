@@ -52,11 +52,14 @@ npm run start:prod
 ## How It Works
 
 1. Listens for jobs on the `email` BullMQ queue
-2. Validates incoming job data (invoice ID, recipient email, B2 PDF key)
-3. Downloads the PDF from **Backblaze B2** using the provided key
-4. Sends an email via the Maileroo API with the PDF attached as `invoice.pdf`
-5. Deletes the PDF from **Backblaze B2** (no longer needed)
-6. Calls back to the core service via `PATCH /invoice/internal/:id` to mark the invoice as `resolved`
+2. Checks invoice status via `GET /invoice/internal/:id` — skips if `expired` or `closed`
+3. Checks Redis dedup key `email-sent:{invoiceId}` — skips if already sent (5-minute window)
+4. Validates incoming job data (invoice ID, recipient email, B2 PDF key)
+5. Downloads the PDF from **Backblaze B2** using the provided key
+6. Sends an email via the Maileroo API with the PDF attached as `invoice.pdf`
+7. Deletes the PDF from **Backblaze B2** (no longer needed)
+8. Calls back to the core service via `PATCH /invoice/internal/:id` to mark the invoice as `resolved`
+9. On final failure (all retries exhausted): calls back to mark as `closed` and deletes the dedup key to allow manual retry
 
 ### Email Content
 

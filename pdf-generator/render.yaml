@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: pdf-generator
+    runtime: node
+    buildCommand: npm install && npx puppeteer browsers install chrome && npm run build
+    startCommand: node dist/main

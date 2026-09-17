@@ -32,6 +32,7 @@ import { InternalApiKeyRepository } from './internalApiKeyRepository';
           configService.get('database.ssl') === 'true'
             ? { rejectUnauthorized: false }
             : undefined,
+        synchronize: true,
         entities: [
           ClientEntity,
           InvoiceEntity,

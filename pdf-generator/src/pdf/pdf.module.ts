@@ -11,8 +11,20 @@ import { B2Module } from './b2.module';
   imports: [
     HtmlGeneratorModule,
     B2Module,
-    BullModule.registerQueue({ name: PDF_QUEUE_NAME }),
-    BullModule.registerQueue({ name: EMAIL_QUEUE_NAME }),
+    BullModule.registerQueue({
+      name: PDF_QUEUE_NAME,
+      defaultJobOptions: {
+        removeOnComplete: { age: 3600 },
+        removeOnFail: { age: 86400 },
+      },
+    }),
+    BullModule.registerQueue({
+      name: EMAIL_QUEUE_NAME,
+      defaultJobOptions: {
+        removeOnComplete: { age: 3600 },
+        removeOnFail: { age: 86400 },
+      },
+    }),
   ],
   providers: [PdfService, PdfWorker, CallbackService],
 })
