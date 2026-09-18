@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   UseGuards,
@@ -12,6 +13,7 @@ import { CreateInvoiceDto } from './dto/createInvoice.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { InternalAuthGuard } from 'src/auth/internal-auth.guard';
 import type { InvoiceStatus } from 'src/db/types/invoiceStatus';
+import { INVOICE_STATUS_PENDING } from 'src/config/constants';
 
 @Controller('invoice')
 export class InvoiceController {
@@ -25,7 +27,7 @@ export class InvoiceController {
     );
     return {
       id: result.id,
-      status: 'pending',
+      status: INVOICE_STATUS_PENDING,
       ...(result.duplicate && { duplicate: true }),
     };
   }
@@ -43,10 +45,10 @@ export class InvoiceController {
   @Patch('internal/:id')
   @UseGuards(InternalAuthGuard)
   async updateInvoiceStatus(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body('status') status: InvoiceStatus,
   ) {
-    await this.invoiceService.updateStatus(Number(id), status);
+    await this.invoiceService.updateStatus(id, status);
   }
   @Patch('cron/expire-stale')
   @UseGuards(InternalAuthGuard)

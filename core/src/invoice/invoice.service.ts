@@ -10,6 +10,12 @@ import {
   DEDUP_TTL_SECONDS,
   PDF_QUEUE_MAX_ATTEMPTS,
   PDF_QUEUE_BACKOFF_DELAY_MS,
+  JOB_REMOVE_ON_COMPLETE_AGE_SECONDS,
+  JOB_REMOVE_ON_FAIL_AGE_SECONDS,
+  INVOICE_LOCALE,
+  INVOICE_DEDUP_KEY_PREFIX,
+  REDIS_DEDUP_VALUE,
+  INVOICE_STATUS_EXPIRED,
 } from '../config/constants';
 import { InvoiceRepository } from 'src/db/invoiceRepository';
 import { InvoiceStatus } from 'src/db/types/invoiceStatus';
@@ -29,11 +35,11 @@ export class InvoiceService {
     const jobsHash = createHash('md5')
       .update(JSON.stringify(jobs))
       .digest('hex');
-    const dedupKey = `invoice-dedup:${email}:${jobsHash}`;
+    const dedupKey = `${INVOICE_DEDUP_KEY_PREFIX}:${email}:${jobsHash}`;
 
     const isNew = await this.redis.set(
       dedupKey,
-      '1',
+      REDIS_DEDUP_VALUE,
       'EX',
       DEDUP_TTL_SECONDS,
       'NX',
@@ -63,9 +69,12 @@ export class InvoiceService {
       amount,
     }));
 
-    const total = Object.values(jobs).reduce((sum, amt) => sum + amt, 0);
+    const total = Object.values(jobs).reduce(
+      (sum, amt) => +sum.toFixed(14) + amt,
+      0,
+    );
 
-    const invoiceDate = new Date().toLocaleDateString('en-US', {
+    const invoiceDate = new Date().toLocaleDateString(INVOICE_LOCALE, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -88,8 +97,8 @@ export class InvoiceService {
         deduplication: { id: invoiceFromDb.id.toString() },
         attempts: PDF_QUEUE_MAX_ATTEMPTS,
         backoff: { type: 'exponential', delay: PDF_QUEUE_BACKOFF_DELAY_MS },
-        removeOnComplete: { age: 3600 },
-        removeOnFail: { age: 86400 },
+        removeOnComplete: { age: JOB_REMOVE_ON_COMPLETE_AGE_SECONDS },
+        removeOnFail: { age: JOB_REMOVE_ON_FAIL_AGE_SECONDS },
       },
     );
 
@@ -116,7 +125,7 @@ export class InvoiceService {
     const staleInvoices = await this.invoiceRepository.findStaleInvoices();
     if (staleInvoices.length === 0) return 0;
     const ids = staleInvoices.map((inv) => inv.id);
-    await this.invoiceRepository.bulkUpdateStatus(ids, 'expired');
+    await this.invoiceRepository.bulkUpdateStatus(ids, INVOICE_STATUS_EXPIRED);
     return ids.length;
   }
 }

@@ -9,12 +9,18 @@ import {
   EMAIL_QUEUE_NAME,
   PDF_QUEUE_MAX_ATTEMPTS,
   PDF_QUEUE_BACKOFF_DELAY_MS,
+  JOB_REMOVE_ON_COMPLETE_AGE_SECONDS,
+  JOB_REMOVE_ON_FAIL_AGE_SECONDS,
+  JOB_TYPE_SEND_EMAIL,
+  PDF_B2_KEY_PREFIX,
+  INVOICE_STATUS_EXPIRED,
+  INVOICE_STATUS_CLOSED,
 } from '../config/constants';
 import { CallbackService } from './callback.service';
 import { B2Service } from './b2.service';
 import { Logger } from '@nestjs/common';
 
-const SKIP_STATUSES = ['expired', 'closed'];
+const SKIP_STATUSES = [INVOICE_STATUS_EXPIRED, INVOICE_STATUS_CLOSED];
 
 @Processor(PDF_QUEUE_NAME)
 export class PdfWorker extends WorkerHost {
@@ -44,11 +50,11 @@ export class PdfWorker extends WorkerHost {
     try {
       const pdfBuffer = await this.pdfService.createPdf(data);
 
-      const pdfKey = `invoices/${data.invoiceId}.pdf`;
+      const pdfKey = `${PDF_B2_KEY_PREFIX}/${data.invoiceId}.pdf`;
       await this.b2Service.upload(pdfKey, pdfBuffer);
 
       await this.emailQueue.add(
-        'send-email',
+        JOB_TYPE_SEND_EMAIL,
         {
           invoiceId: data.invoiceId,
           email: data.email,
@@ -57,13 +63,16 @@ export class PdfWorker extends WorkerHost {
         {
           attempts: PDF_QUEUE_MAX_ATTEMPTS,
           backoff: { type: 'exponential', delay: PDF_QUEUE_BACKOFF_DELAY_MS },
-          removeOnComplete: { age: 3600 },
-          removeOnFail: { age: 86400 },
+          removeOnComplete: { age: JOB_REMOVE_ON_COMPLETE_AGE_SECONDS },
+          removeOnFail: { age: JOB_REMOVE_ON_FAIL_AGE_SECONDS },
         },
       );
     } catch (error) {
       if (job.attemptsMade >= job.opts.attempts!) {
-        await this.callbackService.updateStatus(data.invoiceId, 'closed');
+        await this.callbackService.updateStatus(
+          data.invoiceId,
+          INVOICE_STATUS_CLOSED,
+        );
       }
       this.logger.error('Worker failed:', error);
       throw error;

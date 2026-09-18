@@ -25,7 +25,6 @@
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
-    "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^11.0.1",
     "bullmq": "^6.3.4",
     "class-transformer": "^0.5.1",

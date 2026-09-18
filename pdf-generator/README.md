@@ -51,12 +51,11 @@ npm run start:prod
 1. Listens for jobs on the `pdf` BullMQ queue
 2. Checks invoice status via `GET /invoice/internal/:id` — skips if `expired` or `closed`
 3. Validates incoming job data (email, name, company, jobs map)
-4. Renders the Handlebars template (`templates/invoice.hbs`) with client and job data
-5. Converts the rendered HTML to PDF using Puppeteer
-6. Uploads the PDF to **Backblaze B2** at key `invoices/{invoiceId}.pdf`
-7. Dispatches a `send-email` job to the `email` BullMQ queue with the invoice ID, recipient email, and B2 PDF key
-8. On success: does not update status (email worker handles that)
-9. On final failure (all retries exhausted): calls back to the core service via `PATCH /invoice/internal/:id` to mark the invoice as `closed`
+4. Converts the rendered HTML to PDF using Puppeteer
+5. Uploads the PDF to **Backblaze B2** at key `invoices/{invoiceId}.pdf`
+6. Dispatches a `send-email` job to the `email` BullMQ queue with the invoice ID, recipient email, and B2 PDF key
+7. On success: does not update status (email worker handles that)
+8. On final failure (all retries exhausted): calls back to the core service via `PATCH /invoice/internal/:id` to mark the invoice as `closed`
 
 ### Invoice Template
 

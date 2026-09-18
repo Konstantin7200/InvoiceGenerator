@@ -1,7 +1,7 @@
-import { BadRequestException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import type { Type } from '@nestjs/common';
+import { UnrecoverableError } from 'bullmq';
 
 export class BullMqValidationPipe {
   async validate<T extends object>(
@@ -12,8 +12,11 @@ export class BullMqValidationPipe {
     const errors = await validate(instance);
 
     if (errors.length > 0) {
-      throw new BadRequestException(
-        errors.map((e) => Object.values(e.constraints || {})).flat(),
+      throw new UnrecoverableError(
+        errors
+          .map((e) => Object.values(e.constraints || {}))
+          .flat()
+          .join(' '),
       );
     }
 

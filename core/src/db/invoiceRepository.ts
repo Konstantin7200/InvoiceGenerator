@@ -3,6 +3,10 @@ import { InvoiceEntity } from './entities/invoiceEntity';
 import { In, LessThan, Repository } from 'typeorm';
 import { CreateInvoiceDto } from '../invoice/dto/createInvoice.dto';
 import { InvoiceStatus } from './types/invoiceStatus';
+import {
+  STALE_INVOICE_AGE_MS,
+  INVOICE_STATUS_PENDING,
+} from '../config/constants';
 
 export class InvoiceRepository {
   constructor(
@@ -43,9 +47,9 @@ export class InvoiceRepository {
   }
 
   async findStaleInvoices() {
-    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const cutoff = new Date(Date.now() - STALE_INVOICE_AGE_MS);
     return this.repo.find({
-      where: { status: 'pending', createdAt: LessThan(cutoff) },
+      where: { status: INVOICE_STATUS_PENDING, createdAt: LessThan(cutoff) },
     });
   }
 

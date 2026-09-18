@@ -4,12 +4,20 @@ import { Job } from 'bullmq';
 import Redis from 'ioredis';
 import { EmailDto } from './dto/email.dto';
 import { BullMqValidationPipe } from './pipes/bullmq-validation.pipe';
-import { EMAIL_QUEUE_NAME, EMAIL_DEDUP_TTL_SECONDS } from '../config/constants';
+import {
+  EMAIL_QUEUE_NAME,
+  EMAIL_DEDUP_TTL_SECONDS,
+  EMAIL_DEDUP_KEY_PREFIX,
+  REDIS_DEDUP_VALUE,
+  INVOICE_STATUS_EXPIRED,
+  INVOICE_STATUS_CLOSED,
+  INVOICE_STATUS_RESOLVED,
+} from '../config/constants';
 import { CallbackService } from './callback.service';
 import { B2Service } from './b2.service';
 import { Logger } from '@nestjs/common';
 
-const SKIP_STATUSES = ['expired', 'closed'];
+const SKIP_STATUSES = [INVOICE_STATUS_EXPIRED, INVOICE_STATUS_CLOSED];
 
 @Processor(EMAIL_QUEUE_NAME)
 export class EmailWorker extends WorkerHost {
@@ -36,10 +44,10 @@ export class EmailWorker extends WorkerHost {
       return;
     }
 
-    const dedupKey = `email-sent:${body.invoiceId}`;
+    const dedupKey = `${EMAIL_DEDUP_KEY_PREFIX}:${body.invoiceId}`;
     const isNew = await this.redis.set(
       dedupKey,
-      '1',
+      REDIS_DEDUP_VALUE,
       'EX',
       EMAIL_DEDUP_TTL_SECONDS,
       'NX',
@@ -49,7 +57,10 @@ export class EmailWorker extends WorkerHost {
       this.logger.log(
         `Email already sent for invoice ${body.invoiceId} — skipping`,
       );
-      await this.callbackService.updateStatus(body.invoiceId, 'resolved');
+      await this.callbackService.updateStatus(
+        body.invoiceId,
+        INVOICE_STATUS_RESOLVED,
+      );
       return;
     }
 
@@ -57,10 +68,16 @@ export class EmailWorker extends WorkerHost {
       const pdfBuffer = await this.b2Service.download(body.pdfKey);
       await this.emailService.sendEmail(body.email, pdfBuffer);
       await this.b2Service.delete(body.pdfKey);
-      await this.callbackService.updateStatus(body.invoiceId, 'resolved');
+      await this.callbackService.updateStatus(
+        body.invoiceId,
+        INVOICE_STATUS_RESOLVED,
+      );
     } catch (err) {
       if (job.attemptsMade >= job.opts.attempts!) {
-        await this.callbackService.updateStatus(body.invoiceId, 'closed');
+        await this.callbackService.updateStatus(
+          body.invoiceId,
+          INVOICE_STATUS_CLOSED,
+        );
         await this.redis.del(dedupKey);
       }
       this.logger.error('Worker failed:', err);
